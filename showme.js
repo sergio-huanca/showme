@@ -54,8 +54,14 @@ function uiMap() {
     panels: [...s.querySelectorAll('[data-panel]')].map(p => ({ id: p.dataset.panel, what: p.dataset.panelDesc, current: !p.hidden })),
     elements: [...s.querySelectorAll('[data-guide]')].map(describe),
   }))
-  const global = [...document.querySelectorAll('[data-guide]')].filter(el => !el.closest('[data-screen]')).map(describe)
-  return { app: app.app, how_to_guide: HOW, screens, always_available: global }
+  const dialogs = [...document.querySelectorAll('[data-dialog]')].map(d => ({
+    id: d.dataset.dialog,
+    what: d.dataset.dialogDesc,
+    open: !d.hidden,
+    elements: [...d.querySelectorAll('[data-guide]')].map(describe),
+  }))
+  const global = [...document.querySelectorAll('[data-guide]')].filter(el => !el.closest('[data-screen]') && !el.closest('[data-dialog]')).map(describe)
+  return { app: app.app, how_to_guide: HOW, screens, dialogs, always_available: global }
 }
 
 function view() {
@@ -81,11 +87,14 @@ function whyHidden(el) {
     return `"${id}" is inside a closed menu. Guide the person to open "${el.dataset.guideMenu}" first (${opener ? desc(opener) : 'menu'}).`
   }
   const dialog = el.closest('[data-dialog]')
-  if (dialog && dialog.hidden) return `"${id}" lives in the "${dialog.dataset.dialog}" dialog, which is not open. It opens from an Edit button on the Notifications page.`
+  if (dialog && dialog.hidden) return `"${id}" lives in the "${dialog.dataset.dialog}" dialog, which is not open. ${dialog.dataset.dialogDesc || ''}`
   const screen = el.closest('[data-screen]')
   if (screen && screen.hidden) return `"${id}" is on the "${screen.dataset.screen}" screen and the person is on "${view().screen?.id}". Guide them there first through an element whose "opens" is "${screen.dataset.screen}".`
   const panel = el.closest('[data-panel]')
   if (panel && panel.hidden) return `"${id}" is in the "${panel.dataset.panel}" panel, which is not selected. Guide them to the "${panel.dataset.panel}" tab first.`
+  const box = el.closest('[hidden]')
+  const toggle = box && box.previousElementSibling
+  if (toggle && toggle.dataset.guide) return `"${id}" is inside the collapsed "${toggle.textContent.trim()}" section. Guide the person to click "${toggle.dataset.guide}" first.`
   return `"${id}" exists but is not visible right now. It probably appears after another action, for example Add column reveals the name field.`
 }
 

@@ -6,7 +6,7 @@ Fecha límite: **3 de septiembre de 2026, 1:00 pm hora del Pacífico** (Devpost)
 
 Hecho y probado en localhost:
 
-- Meridian, la réplica tipo Jira, con tablero, ajustes de tablero, ajustes de proyecto, menús y diálogo.
+- Meridian, la réplica tipo Jira, con tablero, ajustes de tablero, ajustes de proyecto, menús, diálogo de notificaciones, panel de ticket (tipo, etiquetas en la sección Details colapsada, watchers tras el icono del ojo, bandera en el menú "⋯", estado, comentarios) y todas las entradas del menú lateral con su pantalla.
 - La capa ShowMe con las seis herramientas WebMCP, overlay, cursor y panel "Agent activity".
 - Consola de agente de respaldo (Claude desde la página). Probada con la API simulada, no con una clave real.
 - `npm test`: recorrido completo con Playwright sobre tu Chrome instalado, 19 capturas en `test/shots`.
@@ -38,7 +38,9 @@ Prompts exactos, en este orden:
 1. `How do I add a "Code Review" column to this board?`
 2. En mitad de la guía, haz clic en otro sitio a propósito (por ejemplo en "Swimlanes"). El agente lo nota.
 3. Cuando ilumine el botón **Add**: `Just do it for me.` Meridian lo rechaza, el agente lo explica y sigue guiando.
-4. Tras terminar: `Who gets an email when an issue is assigned, and how do I add all watchers?`
+4. Tras terminar: `How do I add the label "needs-design" to ATL-136?` La guía abre la tarjeta, expande la sección Details que está colapsada y llega al campo Labels. Es el ejemplo más rebuscado, úsalo.
+5. Opcional si sobra tiempo: `ATL-136 is actually a bug. How do I change its type?` El icono de tipo junto a la clave es un botón que nadie descubre.
+6. Opcional: `Who gets an email when an issue is assigned, and how do I add all watchers?`
 
 ## Plan B si ChatGPT no muestra Site tools
 
@@ -60,7 +62,7 @@ o arrastra la carpeta (sin `node_modules`) a https://app.netlify.com/drop. Neces
 **0:00 – 0:20 · El problema.** Pantalla: el tablero de Meridian.
 "This is Meridian, a tracker like the one your team lives in. Try to find where you add a column. Today you have two options: a help article that says 'go to board settings' while your screen looks nothing like it, or an agent that does it for you, so you learn nothing and the site has to trust a robot with its configuration. We built the third option."
 
-**0:20 – 1:35 · La demo.** Pantalla dividida: ChatGPT a la izquierda, Meridian a la derecha.
+**0:20 – 1:35 · La demo.** Pantalla dividida: ChatGPT a la izquierda, Meridian a la derecha. Si prefieres un solo caso, el de la etiqueta en ATL-136 cruza tarjeta, sección colapsada y campo, y se entiende sin explicar nada.
 Escribe el prompt 1. Mientras el agente guía: "The agent asks Meridian for a map of its own interface, plans the path, and lights up one step at a time. I do every click." Haz clic en otro sitio a propósito: "If I wander off, it notices and adapts." Cuando ilumine Add, escribe "Just do it for me": "Meridian refuses. Navigation can be delegated; changing the board configuration is mine. The site decides, not the prompt." Termina la guía: "At the end it tells me the path so next time I don't need it."
 
 **1:35 – 1:55 · Lo que ve el agente.** Abre Agent activity.

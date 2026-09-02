@@ -39,6 +39,7 @@
 <symbol id="i-timeline" viewBox="0 0 24 24"><path d="M3 7h10M3 12h16M3 17h7" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol>
 <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
 <symbol id="i-bug" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
 <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-8 8M10 6H5v13h13v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
 </defs></svg>
 
@@ -67,12 +68,12 @@
 
 <div class="shell">
 <nav class="sidebar">
-  <a class="side-item" href="#" data-guide="sidebar.foryou" data-guide-desc="For you, first item of the sidebar"><svg><use href="#i-user"/></svg>For you</a>
-  <a class="side-item" href="#" data-guide="sidebar.recent" data-guide-desc="Recent, in the sidebar"><svg><use href="#i-clock"/></svg>Recent<svg class="tail"><use href="#i-right"/></svg></a>
-  <a class="side-item" href="#" data-guide="sidebar.starred" data-guide-desc="Starred, in the sidebar"><svg><use href="#i-star"/></svg>Starred<svg class="tail"><use href="#i-right"/></svg></a>
-  <a class="side-item" href="#" data-guide="sidebar.apps" data-guide-desc="Apps, in the sidebar"><svg><use href="#i-grid"/></svg>Apps</a>
+  <a class="side-item" href="#foryou" data-guide="sidebar.foryou" data-guide-goto="foryou" data-guide-delegable data-guide-desc="For you, first item of the sidebar"><svg><use href="#i-user"/></svg>For you</a>
+  <a class="side-item" href="#recent" data-guide="sidebar.recent" data-guide-goto="recent" data-guide-delegable data-guide-desc="Recent, in the sidebar"><svg><use href="#i-clock"/></svg>Recent<svg class="tail"><use href="#i-right"/></svg></a>
+  <a class="side-item" href="#starred" data-guide="sidebar.starred" data-guide-goto="starred" data-guide-delegable data-guide-desc="Starred, in the sidebar"><svg><use href="#i-star"/></svg>Starred<svg class="tail"><use href="#i-right"/></svg></a>
+  <a class="side-item" href="#apps" data-guide="sidebar.apps" data-guide-goto="apps" data-guide-delegable data-guide-desc="Apps, in the sidebar"><svg><use href="#i-grid"/></svg>Apps</a>
   <div class="side-row">
-    <a class="side-item" href="#" data-guide="sidebar.spaces" data-guide-desc="Spaces section header in the sidebar"><svg><use href="#i-board"/></svg>Spaces</a>
+    <a class="side-item" href="#spaces" data-guide="sidebar.spaces" data-guide-goto="spaces" data-guide-delegable data-guide-desc="Spaces section header in the sidebar"><svg><use href="#i-board"/></svg>Spaces</a>
     <button class="icon-btn sm" data-guide="sidebar.spaces.add" data-guide-desc="Create a space (plus) next to Spaces"><svg><use href="#i-plus"/></svg></button>
     <button class="icon-btn sm" data-guide="sidebar.spaces.more" data-guide-desc="More actions next to Spaces"><svg><use href="#i-dots"/></svg></button>
   </div>
@@ -90,16 +91,16 @@
   </div>
   <div class="side-sub small">Recent</div>
   <a class="side-item nested active" href="#board" data-guide="sidebar.board.kanban" data-guide-delegable data-guide-goto="board" data-guide-desc="ATL Kanban board link under the Atlas Platform project"><svg><use href="#i-board"/></svg>ATL Kanban board</a>
-  <a class="side-item nested" href="#" data-guide="sidebar.board.scrum" data-guide-desc="ATL board, the second board of the project"><svg><use href="#i-board"/></svg>ATL board</a>
-  <div class="side-project"><span class="proj-icon orion"></span><a href="#" class="proj-name" data-guide="sidebar.project.orion" data-guide-desc="Orion Mobile project in the sidebar">Orion Mobile</a></div>
-  <div class="side-project"><span class="proj-icon soc"></span><a href="#" class="proj-name" data-guide="sidebar.project.soc2" data-guide-desc="SOC2 2026 project in the sidebar">SOC2 2026</a></div>
-  <a class="side-item" href="#" data-guide="sidebar.morespaces" data-guide-desc="More spaces, in the sidebar"><svg><use href="#i-list"/></svg>More spaces<svg class="tail"><use href="#i-right"/></svg></a>
+  <a class="side-item nested" href="#atl-board" data-guide="sidebar.board.scrum" data-guide-goto="atl-board" data-guide-delegable data-guide-desc="ATL board, the second board of the project"><svg><use href="#i-board"/></svg>ATL board</a>
+  <div class="side-project"><span class="proj-icon orion"></span><a href="#orion" class="proj-name" data-guide="sidebar.project.orion" data-guide-goto="orion" data-guide-delegable data-guide-desc="Orion Mobile project in the sidebar">Orion Mobile</a></div>
+  <div class="side-project"><span class="proj-icon soc"></span><a href="#soc2" class="proj-name" data-guide="sidebar.project.soc2" data-guide-goto="soc2" data-guide-delegable data-guide-desc="SOC2 2026 project in the sidebar">SOC2 2026</a></div>
+  <a class="side-item" href="#spaces" data-guide="sidebar.morespaces" data-guide-goto="spaces" data-guide-delegable data-guide-desc="More spaces, in the sidebar"><svg><use href="#i-list"/></svg>More spaces<svg class="tail"><use href="#i-right"/></svg></a>
   <div class="side-sub">Recommended</div>
-  <a class="side-item" href="#" data-guide="sidebar.collect" data-guide-desc="Collect requests, a recommended app in the sidebar"><span class="proj-icon mini"></span>Collect requests<span class="chip try">Try</span></a>
-  <a class="side-item" href="#" data-guide="sidebar.filters" data-guide-desc="Filters, in the sidebar"><svg><use href="#i-filter"/></svg>Filters</a>
-  <a class="side-item" href="#" data-guide="sidebar.dashboards" data-guide-desc="Dashboards, in the sidebar"><svg><use href="#i-dash"/></svg>Dashboards</a>
-  <a class="side-item" href="#" data-guide="sidebar.wiki" data-guide-desc="Wiki, external link in the sidebar"><span class="proj-icon wiki"></span>Wiki<svg class="tail"><use href="#i-ext"/></svg></a>
-  <a class="side-item" href="#" data-guide="sidebar.teams" data-guide-desc="Teams, in the sidebar"><svg><use href="#i-people"/></svg>Teams<svg class="tail"><use href="#i-ext"/></svg></a>
+  <a class="side-item" href="#collect" data-guide="sidebar.collect" data-guide-goto="collect" data-guide-delegable data-guide-desc="Collect requests, a recommended app in the sidebar"><span class="proj-icon mini"></span>Collect requests<span class="chip try">Try</span></a>
+  <a class="side-item" href="#filters" data-guide="sidebar.filters" data-guide-goto="filters" data-guide-delegable data-guide-desc="Filters, in the sidebar"><svg><use href="#i-filter"/></svg>Filters</a>
+  <a class="side-item" href="#dashboards" data-guide="sidebar.dashboards" data-guide-goto="dashboards" data-guide-delegable data-guide-desc="Dashboards, in the sidebar"><svg><use href="#i-dash"/></svg>Dashboards</a>
+  <a class="side-item" href="#wiki" data-guide="sidebar.wiki" data-guide-goto="wiki" data-guide-delegable data-guide-desc="Wiki, external link in the sidebar"><span class="proj-icon wiki"></span>Wiki<svg class="tail"><use href="#i-ext"/></svg></a>
+  <a class="side-item" href="#teams" data-guide="sidebar.teams" data-guide-goto="teams" data-guide-delegable data-guide-desc="Teams, in the sidebar"><svg><use href="#i-people"/></svg>Teams<svg class="tail"><use href="#i-ext"/></svg></a>
   <a class="side-item" href="#" data-guide="sidebar.customize" data-guide-desc="Customize sidebar, last item of the sidebar"><svg><use href="#i-sliders"/></svg>Customize sidebar</a>
 </nav>
 
@@ -275,10 +276,24 @@
 <section data-screen="components" data-screen-desc="Components view" hidden><div class="crumbs"><a href="#">Spaces</a><span>/</span><a href="#board">Atlas Platform</a></div><h1>Components</h1><p class="muted">API, Web, Mobile, Data.</p><a class="btn subtle" href="#board" data-guide="components.back" data-guide-goto="board" data-guide-desc="Back to board">Back to board</a></section>
 <section data-screen="code" data-screen-desc="Code view" hidden><div class="crumbs"><a href="#">Spaces</a><span>/</span><a href="#board">Atlas Platform</a></div><h1>Code</h1><p class="muted">Linked repositories and pull requests.</p><a class="btn subtle" href="#board" data-guide="code.back" data-guide-goto="board" data-guide-desc="Back to board">Back to board</a></section>
 
+<section data-screen="foryou" data-screen-desc="For you: the issues assigned to you. Clicking one opens the issue panel" hidden><h1>For you</h1><h2>Assigned to me</h2><div class="issue-list" id="foryou-list"></div><h2>Recently viewed</h2><ul class="plain"><li>ATL Kanban board</li><li>ATL-136 Variance overview report page</li><li>SOC2 2026</li></ul></section>
+<section data-screen="recent" data-screen-desc="Recently viewed boards, projects and issues" hidden><h1>Recent</h1><ul class="plain"><li>ATL Kanban board · 2 minutes ago</li><li>Board settings · 10 minutes ago</li><li>ATL-224 Alerts view (partner pilot) · yesterday</li><li>Orion Mobile · yesterday</li></ul></section>
+<section data-screen="starred" data-screen-desc="Starred items" hidden><h1>Starred</h1><p class="muted">Boards, filters and dashboards you star show up here. Nothing yet.</p></section>
+<section data-screen="apps" data-screen-desc="Installed apps" hidden><h1>Apps</h1><div class="app-grid"><div class="app-tile">Timesheets</div><div class="app-tile">Test manager</div><div class="app-tile">Roadmaps</div><div class="app-tile">Collect requests</div><div class="app-tile">Slack</div><div class="app-tile">GitHub</div></div></section>
+<section data-screen="spaces" data-screen-desc="Directory of all spaces (projects)" hidden><h1>Spaces</h1><table class="tbl"><tr><th>Name</th><th>Key</th><th>Lead</th></tr><tr><td><a href="#board">Atlas Platform</a></td><td>ATL</td><td>Sergio H.</td></tr><tr><td><a href="#orion">Orion Mobile</a></td><td>ORI</td><td>Ana K.</td></tr><tr><td><a href="#soc2">SOC2 2026</a></td><td>SOC</td><td>Gabriel R.</td></tr></table><button class="btn primary" data-guide="spaces.create" data-guide-desc="Create a new space"><svg><use href="#i-plus"/></svg>Create space</button></section>
+<section data-screen="orion" data-screen-desc="Orion Mobile project home" hidden><div class="crumbs"><a href="#spaces">Spaces</a><span>/</span><span>Orion Mobile</span></div><h1>Orion Mobile</h1><p class="muted">iOS and Android apps. 212 open issues, sprint 18 in progress.</p><div class="stats"><div class="stat"><b>18</b>done last 7 days</div><div class="stat"><b>7</b>bugs open</div><div class="stat"><b>2</b>releases this month</div></div><h2>Boards</h2><ul class="plain"><li>ORI Sprint board</li><li>ORI Bugs</li></ul></section>
+<section data-screen="soc2" data-screen-desc="SOC2 2026 project home" hidden><div class="crumbs"><a href="#spaces">Spaces</a><span>/</span><span>SOC2 2026</span></div><h1>SOC2 2026</h1><p class="muted">Audit evidence and controls. 64 open issues.</p><div class="stats"><div class="stat"><b>41</b>controls done</div><div class="stat"><b>23</b>controls open</div><div class="stat"><b>Oct 12</b>audit date</div></div><h2>Boards</h2><ul class="plain"><li>SOC controls board</li></ul></section>
+<section data-screen="atl-board" data-screen-desc="ATL board, the Scrum board of Atlas Platform" hidden><div class="crumbs"><a href="#spaces">Spaces</a><span>/</span><a href="#board">Atlas Platform</a></div><h1>ATL board</h1><p class="muted">Scrum board of the same project. Sprint 42, 9 days left, 31 issues.</p><a class="btn subtle" href="#board" data-guide="atlboard.kanban" data-guide-goto="board" data-guide-delegable data-guide-desc="Link back to the ATL Kanban board">Open the Kanban board</a></section>
+<section data-screen="collect" data-screen-desc="Collect requests, a recommended app" hidden><h1>Collect requests</h1><p class="muted">Turn a public form into issues in Atlas Platform.</p><button class="btn primary" data-guide="collect.try" data-guide-desc="Try Collect requests for free">Try it free</button></section>
+<section data-screen="filters" data-screen-desc="Saved filters" hidden><h1>Filters</h1><table class="tbl"><tr><th>Name</th><th>Query</th></tr><tr><td>My open issues</td><td><code>assignee = currentUser() AND resolution = Unresolved</code></td></tr><tr><td>Reported by me</td><td><code>reporter = currentUser()</code></td></tr><tr><td>Due this week</td><td><code>due &lt;= endOfWeek()</code></td></tr></table><button class="btn" data-guide="filters.create" data-guide-desc="Create a new saved filter"><svg><use href="#i-plus"/></svg>Create filter</button></section>
+<section data-screen="dashboards" data-screen-desc="Dashboards" hidden><h1>Dashboards</h1><ul class="plain"><li>Atlas delivery</li><li>Bugs by component</li><li>SOC2 evidence progress</li></ul></section>
+<section data-screen="wiki" data-screen-desc="Wiki pages linked to the projects" hidden><h1>Wiki</h1><ul class="plain"><li>Atlas architecture</li><li>Runbooks</li><li>Release notes</li></ul></section>
+<section data-screen="teams" data-screen-desc="Teams directory" hidden><h1>Teams</h1><table class="tbl"><tr><th>Team</th><th>Members</th></tr><tr><td>Platform</td><td>Sergio H., Ana K., Diego G.</td></tr><tr><td>Data</td><td>Ana M., Gabriel R.</td></tr><tr><td>Mobile</td><td>Bruno C., Sofía B.</td></tr></table></section>
+
 </main>
 </div>
 
-<div class="modal-backdrop" id="notif-modal" data-dialog="edit-notifications" hidden>
+<div class="modal-backdrop" id="notif-modal" data-dialog="edit-notifications" data-dialog-desc="Opens from the Edit button of a row on the Notifications page of project settings" hidden>
   <div class="modal">
     <h2 id="notif-modal-title">Edit notifications</h2>
     <p class="muted">Choose who receives an email when this happens.</p>
@@ -290,8 +305,78 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="issue-modal" data-dialog="issue" data-dialog-desc="The issue panel. Opens by clicking an issue card on the board or an issue in the For you list" hidden>
+  <div class="modal issue">
+    <div class="issue-head">
+      <span class="crumbs"><a href="#board">Atlas Platform</a><span>/</span></span>
+      <div class="menu-anchor">
+        <button class="type-btn" data-guide="issue.type" data-opens="issue.type" data-guide-desc="Issue type icon next to the issue key at the top of the issue panel. It looks like decoration but it is a button: opens a menu to change the type between Task, Story and Bug"><span class="type task" id="issue-type-icon"></span><span id="issue-key"></span></button>
+        <div class="menu" data-menu="issue.type" hidden>
+          <div class="menu-head">Change issue type</div>
+          <button data-guide="issue.type.task" data-guide-menu="issue.type" data-guide-desc="Set the issue type to Task, in the type menu"><span class="type task"></span>Task</button>
+          <button data-guide="issue.type.story" data-guide-menu="issue.type" data-guide-desc="Set the issue type to Story, in the type menu"><span class="type story"></span>Story</button>
+          <button data-guide="issue.type.bug" data-guide-menu="issue.type" data-guide-desc="Set the issue type to Bug, in the type menu"><span class="type bug"></span>Bug</button>
+        </div>
+      </div>
+      <span class="spacer"></span>
+      <div class="menu-anchor">
+        <button class="icon-btn" data-guide="issue.watch" data-opens="issue.watch" data-guide-desc="Watch options (eye icon with a number) at the top right of the issue panel. Contains Watch this issue and Add watchers"><svg><use href="#i-eye"/></svg><span class="mini" id="issue-watch-count">1</span></button>
+        <div class="menu right" data-menu="issue.watch" hidden>
+          <button data-guide="issue.watch.toggle" data-guide-menu="issue.watch" id="issue-watch-toggle" data-guide-desc="Start or stop watching this issue yourself, in the watch menu">Watch this issue</button>
+          <button data-guide="issue.watch.add" data-guide-menu="issue.watch" data-guide-delegable data-guide-desc="Add watchers, in the watch menu. Reveals a field to type a colleague's name">Add watchers</button>
+        </div>
+      </div>
+      <button class="icon-btn" data-guide="issue.share" data-guide-desc="Share the issue"><svg><use href="#i-share"/></svg></button>
+      <div class="menu-anchor">
+        <button class="icon-btn" data-guide="issue.more" data-opens="issue.more" data-guide-desc="More actions (three dots) at the top right of the issue panel. Contains Move, Clone, Link issue, Add flag and Delete"><svg><use href="#i-dots"/></svg></button>
+        <div class="menu right" data-menu="issue.more" hidden>
+          <button data-guide="issue.more.move" data-guide-menu="issue.more" data-guide-desc="Move the issue to another project, in the issue menu">Move</button>
+          <button data-guide="issue.more.clone" data-guide-menu="issue.more" data-guide-desc="Clone the issue, in the issue menu">Clone</button>
+          <button data-guide="issue.more.link" data-guide-menu="issue.more" data-guide-desc="Link this issue to another one, in the issue menu">Link issue</button>
+          <button data-guide="issue.more.flag" data-guide-menu="issue.more" id="issue-flag-item" data-guide-desc="Add or remove a flag on this issue, in the issue menu. Flagged issues show yellow on the board">Add flag</button>
+          <button class="danger" data-guide="issue.more.delete" data-guide-menu="issue.more" data-guide-danger data-guide-desc="Delete the issue permanently">Delete</button>
+        </div>
+      </div>
+      <button class="icon-btn" data-guide="issue.close" data-guide-delegable data-guide-desc="Close the issue panel (X at the top right)"><svg><use href="#i-x"/></svg></button>
+    </div>
+    <div class="issue-body">
+      <div class="issue-main">
+        <h2 id="issue-title"></h2>
+        <div class="watchers-box" id="watchers-box" hidden>
+          <label class="field">Add watchers<input id="watchers-input" placeholder="Type a name and press Enter" autocomplete="off" data-guide="issue.watchers.input" data-guide-desc="Add watchers field inside the issue panel. Appears after choosing Add watchers in the watch menu. Type a colleague's name and press Enter"></label>
+          <div class="recips" id="watchers-list"></div>
+        </div>
+        <h3>Description</h3>
+        <p id="issue-desc" class="muted"></p>
+        <h3>Activity</h3>
+        <div id="issue-comments"></div>
+        <textarea id="issue-comment" placeholder="Add a comment…" data-guide="issue.comment" data-guide-desc="Comment box at the bottom of the issue panel"></textarea>
+        <div class="row"><button class="btn primary" data-guide="issue.comment.save" data-guide-desc="Save the comment. Comments are written by the person">Save</button></div>
+      </div>
+      <aside class="issue-side">
+        <label class="field">Status<select id="issue-status" data-guide="issue.status" data-guide-desc="Status dropdown at the top of the issue side panel. Changing it moves the card to the matching column"></select></label>
+        <button class="section-toggle" data-guide="issue.details" data-guide-delegable data-guide-desc="Details section header in the issue side panel. Collapsed by default; expand it to reach Assignee, Labels, Priority, Epic, Due date and Reporter"><svg><use href="#i-right"/></svg>Details</button>
+        <div id="issue-details" hidden>
+          <label class="field">Assignee<select id="issue-assignee" data-guide="issue.assignee" data-guide-desc="Assignee dropdown inside the Details section"></select></label>
+          <label class="field">Labels<div class="chips" id="issue-labels"></div><input id="issue-label-input" placeholder="Type a label and press Enter" autocomplete="off" data-guide="issue.labels" data-guide-desc="Labels field inside the Details section of the open issue. Type a label and press Enter to add it. Saves immediately. Labels are added by the person"></label>
+          <label class="field">Priority<select id="issue-priority" data-guide="issue.priority" data-guide-desc="Priority dropdown inside the Details section"><option>Highest</option><option>High</option><option>Medium</option><option>Low</option></select></label>
+          <label class="field">Epic<input id="issue-epic" readonly data-guide="issue.epic" data-guide-desc="Epic of the issue (read only here)"></label>
+          <label class="field">Due date<input type="date" id="issue-due" data-guide="issue.due" data-guide-desc="Due date field inside the Details section"></label>
+          <label class="field">Reporter<input id="issue-reporter" readonly data-guide="issue.reporter" data-guide-desc="Reporter (read only)"></label>
+        </div>
+        <button class="section-toggle" data-guide="issue.morefields" data-guide-delegable data-guide-desc="More fields section header, collapsed by default: Sprint and Story points"><svg><use href="#i-right"/></svg>More fields</button>
+        <div id="issue-morefields" hidden>
+          <label class="field">Sprint<input value="Sprint 42" readonly></label>
+          <label class="field">Story points<input id="issue-points" value="3" data-guide="issue.points" data-guide-desc="Story points field inside More fields"></label>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" hidden></div>
 
+<script>if (location.protocol === 'file:') document.body.insertAdjacentHTML('afterbegin', '<div class="file-banner">This page was opened from disk, so the browser blocks its scripts. Run <code>npm start</code> and open <code>http://localhost:8080</code>.</div>')</script>
 <script src="vendor/webmcp-polyfill.js"></script>
 <script type="module" src="app.js"></script>
 </body>

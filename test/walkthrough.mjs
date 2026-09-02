@@ -26,8 +26,9 @@ async function step(id, message, act) {
   await page.waitForTimeout(450)
   await shot(id.replace(/[^a-z0-9]+/gi, '-'))
   const waiting = run('wait_for_action', { element_id: id })
+  waiting.catch(() => {})
   await page.waitForTimeout(120)
-  await act()
+  try { await act() } catch (e) { throw new Error(`step ${id}: ${e.message.split('\n')[0]}`) }
   const r = await waiting
   assert.equal(r.done, true, `wait ${id}: ${r.reason}`)
   return r
@@ -127,6 +128,52 @@ try {
   assert.ok(r.now.app_state.notification_recipients['Issue assigned'].includes('All watchers'))
   await run('end_walkthrough')
   await shot('notifications-saved')
+
+  await page.click('[data-guide="sidebar.filters"]')
+  await page.waitForFunction(() => !document.querySelector('[data-screen="filters"]').hidden)
+  assert.equal((await run('get_current_view')).screen.id, 'filters')
+  await page.click('[data-guide="sidebar.board.kanban"]')
+  await page.waitForFunction(() => !document.querySelector('[data-screen="board"]').hidden)
+
+  const closedDialog = await run('highlight_step', { element_id: 'issue.labels', message: 'x' })
+  assert.equal(closedDialog.ok, false)
+  assert.match(closedDialog.error, /"issue" dialog/)
+
+  r = await step('card.ATL-136', 'Open ATL-136.', () => click('card.ATL-136'))
+  assert.equal(r.now.open_dialog, 'issue')
+  const collapsed = await run('highlight_step', { element_id: 'issue.labels', message: 'x' })
+  assert.equal(collapsed.ok, false)
+  assert.match(collapsed.error, /issue\.details/)
+
+  r = await step('issue.details', 'Expand Details.', () => click('issue.details'))
+  assert.ok(r.now.visible_elements.includes('issue.labels'))
+  r = await step('issue.labels', 'Type needs-design and press Enter.', async () => {
+    await page.type('[data-guide="issue.labels"]', 'needs-design', { delay: 30 })
+    await page.press('[data-guide="issue.labels"]', 'Enter')
+  })
+  assert.ok(r.now.app_state.open_issue.labels.includes('needs-design'))
+
+  r = await step('issue.type', 'Click the type icon next to the key.', () => click('issue.type'))
+  assert.equal(r.now.open_menu, 'issue.type')
+  r = await step('issue.type.bug', 'Choose Bug.', () => click('issue.type.bug'))
+  assert.equal(r.now.app_state.open_issue.type, 'bug')
+  const noLabels = await run('do_step_for_person', { element_id: 'issue.labels', value: 'x' })
+  assert.equal(noLabels.refused, true)
+
+  await step('issue.watch', 'Click the eye icon.', () => click('issue.watch'))
+  await step('issue.watch.add', 'Choose Add watchers.', () => click('issue.watch.add'))
+  r = await step('issue.watchers.input', 'Type Ana and press Enter.', async () => {
+    await page.type('[data-guide="issue.watchers.input"]', 'Ana K', { delay: 30 })
+    await page.press('[data-guide="issue.watchers.input"]', 'Enter')
+  })
+  assert.ok(r.now.app_state.open_issue.watchers.includes('Ana K.'))
+  await shot('issue-panel')
+  r = await step('issue.close', 'Close the issue.', () => click('issue.close'))
+  assert.equal(r.now.open_dialog, null)
+  assert.equal(await page.locator('.card[data-open-issue="ATL-136"] .type.bug').count(), 1)
+  assert.equal(await page.locator('.card[data-open-issue="ATL-136"] .chip:has-text("needs-design")').count(), 1)
+  await run('end_walkthrough')
+  await shot('board-after-issue')
 
   const apiCalls = []
   await page.route('https://api.anthropic.com/v1/messages', route => {

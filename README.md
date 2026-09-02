@@ -2,7 +2,7 @@
 
 A WebMCP layer that turns any web app into something an AI agent can **teach** rather than operate. The agent understands your question, the site publishes a map of its own interface, and the agent lights up the path one step at a time. You do every click. Nothing changes unless your hand changes it.
 
-The demo app is **Meridian**, a fictional Jira-style tracker with the usual maze of board settings, project settings, menus and dialogs.
+The demo app is **Meridian**, a fictional Jira-style tracker with the usual maze: board settings behind a three-dots menu, project settings behind another, an issue panel whose Labels field lives inside a collapsed Details section, a type icon that does not look like a button, and a watchers menu hiding behind an eye icon.
 
 ![The agent highlights the three-dots menu on the board](docs/highlight.png)
 
@@ -17,8 +17,11 @@ ShowMe is the third option. The site exposes six small WebMCP tools. With them a
 **ChatGPT desktop app** (WebMCP built in): open the deployed URL in ChatGPT's browser, click **Site tools** in the address bar to see the six tools, then ask:
 
 1. `How do I add a "Code Review" column to this board?`
-2. `Who gets an email when an issue is assigned, and how do I add all watchers?`
-3. `How do I set a WIP limit of 5 on In progress?`
+2. `How do I add the label "needs-design" to ATL-136?` (the Labels field hides inside a collapsed Details section of the issue panel)
+3. `ATL-136 is actually a bug. How do I change its type?` (the type icon next to the key is a button, nobody knows)
+4. `How do I add Ana as a watcher on ATL-224?`
+5. `Who gets an email when an issue is assigned, and how do I add all watchers?`
+6. `How do I set a WIP limit of 5 on In progress?`
 
 Follow the spotlight. Click the wrong thing on purpose once, the agent notices. Ask it to *just do it for me* on the final Add or Save button and watch Meridian refuse.
 
@@ -87,5 +90,6 @@ test/walkthrough.mjs  Playwright walkthrough: two full guides, abort on wrong cl
 - `wait_for_action` returns `still waiting` after 45 seconds by default and keeps the spotlight on, so agent runtimes with a shorter tool timeout can simply call it again. Adjust the default in `showme.js` if your runtime cuts earlier.
 - The polyfill never runs when the browser implements WebMCP natively; it makes `npm test` work on a stock Chrome and lets the backup agent run anywhere.
 - Meridian is fictional. Names, issues and people are invented.
+- Opening `index.html` from disk shows a banner instead of the app: browsers block ES modules on `file://`, so use `npm start` or the deployed URL.
 
 MIT © 2026 Sergio Huanca
