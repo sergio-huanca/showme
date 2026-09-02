@@ -10,11 +10,11 @@ let ui, spot, caption, cursor, drawer
 
 const HOW = [
   'You are guiding a person who wants to learn where things are. You show, they click.',
-  'Plan the shortest path from the current screen with the ids below. Elements with inside_menu need that menu opened first. Screens are reached through elements whose "opens" names the screen.',
-  'For every step call highlight_step with one short friendly sentence, then wait_for_action on the same element. One step at a time, never several highlights in a row.',
-  'Read what wait_for_action returns before the next step. done:false explains why; adapt instead of repeating the same step.',
+  'Plan the whole path from the current screen with the ids below, then call run_walkthrough once with every step. Elements with inside_menu need that menu opened in an earlier step. Screens are reached through elements whose "opens" names the screen. Collapsed sections and dialogs need their opener as an earlier step.',
+  'The page paces the person: each spotlight appears the instant they finish the previous step, so do not split the path into several calls.',
+  'If run_walkthrough returns in_progress, call it again without steps to keep waiting. If it returns interrupted or blocked, read the reason and now, then call it again with the remaining steps.',
   'Only call do_step_for_person when the person explicitly asks you to do a step for them. Most steps are theirs by policy and the tool will say so.',
-  'When the task is complete call end_walkthrough and tell the person the path in one line so they remember it next time.',
+  'When the walkthrough is completed, tell the person the path in one line so they remember it next time, and call end_walkthrough.',
 ]
 
 const q = id => document.querySelector(`[data-guide="${CSS.escape(id)}"]`)
@@ -165,6 +165,7 @@ function markDone() {
 
 function endWalk(reason) {
   const steps = walk ? walk.step : 0
+  stopRun('the walkthrough ended: ' + reason)
   clearSpot()
   if (pending) pending.cancel('the walkthrough ended: ' + reason)
   if (walk) {
@@ -189,7 +190,7 @@ async function highlight({ element_id, message, step }) {
   caption.hidden = false
   spot.classList.remove('done')
   caption.classList.remove('done')
-  caption.querySelector('.step').textContent = `Step ${walk.step}`
+  caption.querySelector('.step').textContent = `Step ${walk.step}${walk.total ? ' of ' + walk.total : ''}`
   caption.querySelector('.text').textContent = message || desc(el)
   caption.querySelector('.hint').textContent = hintFor(el)
   cursor.classList.add('on')
@@ -304,6 +305,98 @@ async function doStep({ element_id, value }) {
   return { ok: true, did: value != null && el.matches('input, textarea') ? `typed "${value}" into ${element_id}` : `clicked ${element_id}`, now: view() }
 }
 
+const untilVisible = async (el, ms) => {
+  const until = performance.now() + ms
+  while (!visible(el) && performance.now() < until) await sleep(100)
+  return visible(el)
+}
+
+function finishRun(run, status, reason) {
+  if (run.status !== 'in_progress') return
+  run.status = status
+  run.reason = reason || null
+  if (status === 'completed') {
+    caption.querySelector('.step').textContent = 'Done ✓'
+    caption.querySelector('.text').textContent = 'That was the last step. You did every click yourself.'
+    caption.querySelector('.hint').textContent = ''
+    setTimeout(() => { if (walk && walk.run === run) clearSpot() }, 2500)
+  }
+  run.waiters.splice(0).forEach(fn => fn())
+}
+
+function stopRun(reason) {
+  const run = walk && walk.run
+  if (run && run.status === 'in_progress') {
+    finishRun(run, 'interrupted', reason)
+    if (pending) pending.cancel(reason)
+  }
+}
+
+async function drive(run) {
+  while (run.index < run.steps.length && run.status === 'in_progress') {
+    const step = run.steps[run.index]
+    const el = q(step.element_id)
+    if (!el) { finishRun(run, 'blocked', `No element with id "${step.element_id}" exists right now. Call get_ui_map to see the ids.`); return }
+    const ready = run.index === 0 ? visible(el) : await untilVisible(el, 6000)
+    if (run.status !== 'in_progress') return
+    if (!ready) { finishRun(run, 'blocked', whyHidden(el)); return }
+    await highlight({ element_id: step.element_id, message: step.message })
+    let r
+    do { r = await waitFor({ element_id: step.element_id, timeout_seconds: 600 }, {}) }
+    while (r.done === false && r.reason === 'still waiting' && run.status === 'in_progress')
+    if (run.status !== 'in_progress') return
+    if (!r.done) { finishRun(run, 'interrupted', r.reason); return }
+    run.results.push({ element_id: step.element_id, action: r.action })
+    run.index++
+    await sleep(350)
+  }
+  finishRun(run, 'completed')
+}
+
+const NEXT = {
+  in_progress: 'The walkthrough keeps running on the page. Call run_walkthrough again without steps to keep waiting.',
+  completed: 'Tell the person the path in one line and call end_walkthrough.',
+  interrupted: 'Read reason and now, then call run_walkthrough with the remaining steps. Re-plan if the person went somewhere else.',
+  blocked: 'That step was not reachable when its turn came. Check now.visible_elements and call run_walkthrough with a corrected plan.',
+}
+
+function report(run) {
+  return {
+    status: run.status,
+    steps_total: run.steps.length,
+    completed_steps: run.results,
+    current_step: run.status === 'in_progress' ? { number: run.index + 1, ...run.steps[run.index] } : null,
+    reason: run.reason || undefined,
+    next: NEXT[run.status],
+    now: view(),
+  }
+}
+
+async function runWalkthrough({ steps, timeout_seconds }, ctx = {}) {
+  const seconds = Number(timeout_seconds) > 0 ? Number(timeout_seconds) : 40
+  if (Array.isArray(steps) && steps.length) {
+    const unknown = steps.filter(x => !x || !q(x.element_id)).map(x => x && x.element_id)
+    if (unknown.length) return { ok: false, error: `Unknown element ids: ${unknown.join(', ')}. Call get_ui_map to see the ids.` }
+    stopRun('replaced by a new walkthrough')
+    if (!walk) startWalk()
+    walk.step = 0
+    walk.total = steps.length
+    walk.run = { steps: steps.map(x => ({ element_id: x.element_id, message: x.message || '' })), index: 0, results: [], status: 'in_progress', reason: null, waiters: [] }
+    drive(walk.run)
+  } else if (!walk || !walk.run) {
+    return { ok: false, error: 'No walkthrough is running. Pass steps to start one.' }
+  }
+  const run = walk.run
+  if (run.status === 'in_progress') {
+    await new Promise(resolve => {
+      run.waiters.push(resolve)
+      setTimeout(resolve, seconds * 1000)
+      if (ctx.signal) ctx.signal.addEventListener('abort', resolve)
+    })
+  }
+  return report(run)
+}
+
 const objSchema = (props = {}, required = []) => ({ type: 'object', properties: props, ...(required.length ? { required } : {}) })
 const elementId = { type: 'string', description: 'Element id from get_ui_map, for example board.more' }
 
@@ -323,23 +416,24 @@ const baseTools = [
     execute: view,
   },
   {
-    name: 'highlight_step',
-    description: 'Dim the page and put a spotlight on one element with a short message for the person. Use it for each step of a guide, then call wait_for_action on the same element. If the element is not visible yet it explains what to do first.',
+    name: 'run_walkthrough',
+    description: 'Guide the person through a whole path. Pass every step in order; the page spotlights the first element with your message, waits for the person to click, tick or type it, then moves the spotlight to the next step by itself, so the person never waits for you between steps. Returns completed when they did all steps, interrupted with a reason when they clicked somewhere else or the walkthrough was stopped, blocked when a step was not reachable when its turn came, or in_progress after timeout_seconds (default 40) while the walkthrough keeps running; call it again without steps to keep waiting.',
     inputSchema: objSchema({
-      element_id: elementId,
-      message: { type: 'string', description: 'One short friendly sentence telling the person what to do, e.g. "Click the three dots at the right of the toolbar."' },
-      step: { type: 'integer', description: 'Step number to show. Defaults to the next number.' },
-    }, ['element_id', 'message']),
-    execute: highlight,
-  },
-  {
-    name: 'wait_for_action',
-    description: 'Wait until the person clicks, ticks or types into the highlighted element. Returns done:true with the new view when they do it, or done:false with a reason when they click somewhere else, the element disappears, or nothing happens for timeout_seconds (default 45, then call it again). Read the result before choosing the next step.',
-    inputSchema: objSchema({
-      element_id: elementId,
-      timeout_seconds: { type: 'integer', description: 'How long to wait before returning "still waiting". Default 45.' },
-    }, ['element_id']),
-    execute: waitFor,
+      steps: {
+        type: 'array',
+        description: 'The full path, in order. Omit to keep waiting for the walkthrough that is already running.',
+        items: {
+          type: 'object',
+          properties: {
+            element_id: elementId,
+            message: { type: 'string', description: 'One short friendly sentence for this step, e.g. "Click the three dots at the right of the toolbar."' },
+          },
+          required: ['element_id', 'message'],
+        },
+      },
+      timeout_seconds: { type: 'integer', description: 'How long this call waits before returning in_progress. Default 40.' },
+    }),
+    execute: runWalkthrough,
   },
   {
     name: 'do_step_for_person',
@@ -432,7 +526,7 @@ function buildDrawer() {
 
 const tagFor = t => {
   if (t.annotations && t.annotations.readOnlyHint) return '<span class="tag ro">read-only</span>'
-  if (t.name === 'wait_for_action') return '<span class="tag wait">waits for you</span>'
+  if (t.name === 'run_walkthrough') return '<span class="tag wait">paces you</span>'
   if (t.name === 'end_walkthrough') return '<span class="tag guide">guide only</span>'
   if (t.name === 'do_step_for_person') return '<span class="tag">policy gated</span>'
   return ''
@@ -503,6 +597,7 @@ export async function startGuide(opts) {
       return JSON.parse(await entry.execute(input || {}, {}))
     },
     tools: () => [...registry.values()].map(t => ({ name: t.name, description: t.description, inputSchema: t.inputSchema })),
+    state: () => ({ target: walk ? walk.target : null, step: walk ? walk.step : 0, run: walk && walk.run ? { index: walk.run.index, status: walk.run.status } : null }),
     drawer: () => drawer,
     log: (name, input, out, who) => { calls.unshift({ name, input, out, at: new Date(), who }); renderCalls() },
   }

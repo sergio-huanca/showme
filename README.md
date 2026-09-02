@@ -10,7 +10,7 @@ The demo app is **Meridian**, a fictional Jira-style tracker with the usual maze
 
 Every "how do I…" today ends one of two ways: a help article that says *go to Settings › Columns* while your screen looks nothing like the article, or an agent that offers to do it for you, so you learn nothing and the site has to trust a robot with its configuration.
 
-ShowMe is the third option. The site exposes six small WebMCP tools. With them an agent can find out where you are, spotlight the next element with a one-line message, wait until you actually do the step, and adapt when you click somewhere else. The site decides which steps an agent may ever do on your behalf (navigation, search boxes) and which stay human (anything that changes configuration).
+ShowMe is the third option. The site exposes five small WebMCP tools. With them an agent finds out where you are, plans the whole path once, and hands it to the page, which spotlights one element at a time and moves on the instant you do each step. No model latency between steps: the agent plans, the page paces. If you click somewhere else the page stops and tells the agent why, and the agent re-plans. The site decides which steps an agent may ever do on your behalf (navigation, search boxes) and which stay human (anything that changes configuration).
 
 ## Try it in two minutes
 
@@ -41,8 +41,7 @@ npm test           # Playwright walkthrough against your installed Chrome, scree
 |---|---|---|
 | `get_ui_map` | Every screen, panel, menu and element with ids and short guiding rules | `readOnlyHint: true` |
 | `get_current_view` | Screen, panel, open menu or dialog, visible ids, walkthrough state, app data snapshot | `readOnlyHint`, `untrustedContentHint` (echoes user-typed values) |
-| `highlight_step` | Dims the page, spotlights one element, shows a message; explains what to open first if the element is hidden | descriptive errors so the model self-corrects |
-| `wait_for_action` | Long-running: resolves when the person clicks, ticks or types into the element; `done:false` with a reason if they click elsewhere, the element disappears, or `timeout_seconds` pass | honours the `AbortSignal` passed to `execute`, returns the new view for verification |
+| `run_walkthrough` | Takes the whole path. The page spotlights each element with the agent's message, waits for the person to click, tick or type, then moves on by itself. Returns `completed`, `interrupted` with the reason (wrong click, stopped), `blocked` when a step is unreachable, or `in_progress` after `timeout_seconds` while the walkthrough keeps running | long-running `execute` that honours the `AbortSignal`, returns partial progress and the new view so the agent re-plans instead of guessing |
 | `do_step_for_person` | Performs a step only if the site allows it; refuses configuration changes with the policy text | policy lives in the markup, not in the prompt |
 | `end_walkthrough` | Clears the guide | registered with an `AbortController` only while a walkthrough is active, so the agent's tool list changes live (`toolchange`) |
 
@@ -87,7 +86,8 @@ test/walkthrough.mjs  Playwright walkthrough: two full guides, abort on wrong cl
 
 ## Notes
 
-- `wait_for_action` returns `still waiting` after 45 seconds by default and keeps the spotlight on, so agent runtimes with a shorter tool timeout can simply call it again. Adjust the default in `showme.js` if your runtime cuts earlier.
+- `run_walkthrough` returns `in_progress` after 40 seconds by default while the walkthrough keeps running on the page, so agent runtimes with a shorter tool timeout simply call it again. Adjust the default in `showme.js` if your runtime cuts earlier.
+- Why one call for the whole path: in ChatGPT every tool round trip costs 10 to 20 seconds of model time. With one spotlight per call the person waited that long between steps. Handing the whole plan to the page makes the next spotlight appear the instant they finish the previous step.
 - The page talks to `document.modelContext` only. `npm test` injects Google's polyfill into the test browser so the walkthrough runs on a stock Chrome; the backup agent uses the page's own registry, so it works even where the API is missing. `check.html` tells you whether the browser you are in provides the API.
 - Meridian is fictional. Names, issues and people are invented.
 - Opening `index.html` from disk shows a banner instead of the app: browsers block ES modules on `file://`, so use `npm start` or the deployed URL.

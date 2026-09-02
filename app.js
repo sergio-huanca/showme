@@ -415,7 +415,7 @@ $('#notif-table').addEventListener('click', e => {
   if (!btn) return
   editing = notifications.find(n => n.id === btn.dataset.guide.split('.').pop())
   $('#notif-modal-title').textContent = `Edit notifications: ${editing.event}`
-  $('#notif-checks').innerHTML = recipients.map(r => `<label><input type="checkbox" ${editing.to.includes(r) ? 'checked' : ''} data-guide="notif.recipient.${slug(r)}" data-guide-desc="Checkbox: ${r} receives an email when ${editing.event.toLowerCase()}">${r}</label>`).join('')
+  $$('#notif-checks input').forEach(i => { i.checked = editing.to.includes(i.parentElement.textContent.trim()) })
   notifModal.hidden = false
 })
 $('[data-guide="notif.cancel"]').addEventListener('click', () => { notifModal.hidden = true })
@@ -443,6 +443,7 @@ ruleForm.addEventListener('submit', e => {
   toast('Rule turned on')
 })
 
+$('#notif-checks').innerHTML = recipients.map(r => `<label><input type="checkbox" data-guide="notif.recipient.${slug(r)}" data-guide-desc="Checkbox in the edit notifications dialog: ${r} receives an email for the event being edited">${r}</label>`).join('')
 renderBoard()
 renderColumnsConfig()
 renderNotifs()
