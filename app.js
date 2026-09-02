@@ -160,6 +160,7 @@ function go(hash) {
   closeMenus()
   notifModal.hidden = true
   issueModal.hidden = true
+  document.body.classList.remove('sidebar-open')
   window.scrollTo(0, 0)
 }
 function nav(to) {
@@ -210,6 +211,7 @@ function renderIssueBits() {
 }
 
 const actions = {
+  'nav.menu': () => document.body.classList.toggle('sidebar-open'),
   'issue.type.task': () => setType('task'),
   'issue.type.story': () => setType('story'),
   'issue.type.bug': () => setType('bug'),
@@ -310,6 +312,7 @@ document.addEventListener('click', e => {
     return
   }
   if (!e.target.closest('.menu-anchor')) closeMenus()
+  if (!e.target.closest('.sidebar')) document.body.classList.remove('sidebar-open')
   if (e.target === issueModal) issueModal.hidden = true
   const a = e.target.closest('a[href="#"]')
   if (a) {

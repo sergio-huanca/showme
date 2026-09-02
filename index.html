@@ -40,10 +40,12 @@
 <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
 <symbol id="i-bug" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></symbol>
 <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
 <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-8 8M10 6H5v13h13v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
 </defs></svg>
 
 <header class="topbar">
+  <button class="icon-btn menu-btn" aria-label="Menu" data-guide="nav.menu" data-guide-delegable data-guide-desc="Menu button at the top left. On narrow screens the navigation sidebar is hidden and this button opens it"><svg><use href="#i-menu"/></svg></button>
   <button class="icon-btn" aria-label="Switch app" data-guide="nav.appswitcher" data-guide-desc="App switcher (grid icon) at the far left of the top bar"><svg><use href="#i-grid"/></svg></button>
   <a class="brand" href="#board" data-guide="nav.home" data-guide-delegable data-guide-desc="Meridian logo in the top bar. Goes back to the board" data-guide-goto="board"><span class="brand-mark"></span>Meridian</a>
   <div class="global-search">
@@ -67,7 +69,7 @@
 </header>
 
 <div class="shell">
-<nav class="sidebar">
+<nav class="sidebar" data-region="navigation sidebar" data-region-opener="nav.menu">
   <a class="side-item" href="#foryou" data-guide="sidebar.foryou" data-guide-goto="foryou" data-guide-delegable data-guide-desc="For you, first item of the sidebar"><svg><use href="#i-user"/></svg>For you</a>
   <a class="side-item" href="#recent" data-guide="sidebar.recent" data-guide-goto="recent" data-guide-delegable data-guide-desc="Recent, in the sidebar"><svg><use href="#i-clock"/></svg>Recent<svg class="tail"><use href="#i-right"/></svg></a>
   <a class="side-item" href="#starred" data-guide="sidebar.starred" data-guide-goto="starred" data-guide-delegable data-guide-desc="Starred, in the sidebar"><svg><use href="#i-star"/></svg>Starred<svg class="tail"><use href="#i-right"/></svg></a>

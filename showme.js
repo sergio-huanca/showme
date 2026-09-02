@@ -86,6 +86,8 @@ function whyHidden(el) {
     const opener = q(el.dataset.guideMenu)
     return `"${id}" is inside a closed menu. Guide the person to open "${el.dataset.guideMenu}" first (${opener ? desc(opener) : 'menu'}).`
   }
+  const region = el.closest('[data-region]')
+  if (region && !visible(region)) return `"${id}" is in the ${region.dataset.region}, which is closed at this screen size. Guide the person to open it first with "${region.dataset.regionOpener}".`
   const dialog = el.closest('[data-dialog]')
   if (dialog && dialog.hidden) return `"${id}" lives in the "${dialog.dataset.dialog}" dialog, which is not open. ${dialog.dataset.dialogDesc || ''}`
   const screen = el.closest('[data-screen]')
@@ -312,14 +314,34 @@ const untilVisible = async (el, ms) => {
   return visible(el)
 }
 
+const labelOf = el => {
+  if (!el) return '?'
+  if (el.dataset.guideLabel) return el.dataset.guideLabel
+  const text = el.textContent.trim().replace(/\s+/g, ' ')
+  if (text && text.length <= 28) return text
+  return desc(el).split(/[.,(]/)[0].trim().slice(0, 40)
+}
+
+function learned() {
+  try { return JSON.parse(localStorage.getItem('showme.learned') || '[]') } catch { return [] }
+}
+
+function remember(run) {
+  const entry = { title: run.title || `${run.steps.length}-step path`, when: Date.now(), path: run.steps.map(x => labelOf(q(x.element_id))) }
+  try { localStorage.setItem('showme.learned', JSON.stringify([entry, ...learned()].slice(0, 30))) } catch {}
+  run.learned_path = entry.path
+  renderLearned()
+}
+
 function finishRun(run, status, reason) {
   if (run.status !== 'in_progress') return
   run.status = status
   run.reason = reason || null
   if (status === 'completed') {
+    remember(run)
     caption.querySelector('.step').textContent = 'Done ✓'
     caption.querySelector('.text').textContent = 'That was the last step. You did every click yourself.'
-    caption.querySelector('.hint').textContent = ''
+    caption.querySelector('.hint').textContent = 'Saved under Paths you learned in Agent activity'
     setTimeout(() => { if (walk && walk.run === run) clearSpot() }, 2500)
   }
   run.waiters.splice(0).forEach(fn => fn())
@@ -368,12 +390,13 @@ function report(run) {
     completed_steps: run.results,
     current_step: run.status === 'in_progress' ? { number: run.index + 1, ...run.steps[run.index] } : null,
     reason: run.reason || undefined,
+    learned_path: run.learned_path,
     next: NEXT[run.status],
     now: view(),
   }
 }
 
-async function runWalkthrough({ steps, timeout_seconds }, ctx = {}) {
+async function runWalkthrough({ steps, title, timeout_seconds }, ctx = {}) {
   const seconds = Number(timeout_seconds) > 0 ? Number(timeout_seconds) : 40
   if (Array.isArray(steps) && steps.length) {
     const unknown = steps.filter(x => !x || !q(x.element_id)).map(x => x && x.element_id)
@@ -382,7 +405,7 @@ async function runWalkthrough({ steps, timeout_seconds }, ctx = {}) {
     if (!walk) startWalk()
     walk.step = 0
     walk.total = steps.length
-    walk.run = { steps: steps.map(x => ({ element_id: x.element_id, message: x.message || '' })), index: 0, results: [], status: 'in_progress', reason: null, waiters: [] }
+    walk.run = { title: title || '', steps: steps.map(x => ({ element_id: x.element_id, message: x.message || '' })), index: 0, results: [], status: 'in_progress', reason: null, waiters: [] }
     drive(walk.run)
   } else if (!walk || !walk.run) {
     return { ok: false, error: 'No walkthrough is running. Pass steps to start one.' }
@@ -432,6 +455,7 @@ const baseTools = [
           required: ['element_id', 'message'],
         },
       },
+      title: { type: 'string', description: 'What the person wanted, in their words, e.g. "Add a Code Review column". Saved with the path in their list of learned paths.' },
       timeout_seconds: { type: 'integer', description: 'How long this call waits before returning in_progress. Default 40.' },
     }),
     execute: runWalkthrough,
@@ -522,10 +546,14 @@ function buildDrawer() {
 <h3>The map the site publishes</h3>
 <div class="map"></div>
 <details class="mapdump"><summary>Show exactly what get_ui_map returns</summary><pre></pre></details>
+<h3>Paths you learned<span class="count">0</span><span class="clear">clear</span></h3>
+<ol class="learned"></ol>
+<div class="empty-learned empty">Finish a guide and its path is saved here, in this browser.</div>
 <h3>Calls</h3>
-<div class="empty">No calls yet. Ask your agent how to do something in Meridian.</div>
+<div class="empty empty-calls">No calls yet. Ask your agent how to do something in Meridian.</div>
 <ul class="calls"></ul>`
   drawer.querySelector('header .icon-btn').addEventListener('click', () => { drawer.hidden = true; document.body.classList.remove('drawer-open') })
+  drawer.querySelector('h3 .clear').addEventListener('click', () => { try { localStorage.removeItem('showme.learned') } catch {} renderLearned() })
   drawer.querySelector('.mapdump').addEventListener('toggle', e => { if (e.target.open) e.target.querySelector('pre').textContent = JSON.stringify(uiMap(), null, 2) })
   document.body.appendChild(drawer)
 }
@@ -570,10 +598,23 @@ function renderMap() {
   if (dump.open) dump.querySelector('pre').textContent = JSON.stringify(m, null, 2)
 }
 
+function renderLearned() {
+  if (!drawer) return
+  const list = learned()
+  drawer.querySelector('h3 .count').textContent = list.length
+  drawer.querySelector('.empty-learned').hidden = list.length > 0
+  drawer.querySelector('.learned').innerHTML = list.map(e => {
+    const when = new Date(e.when).toLocaleString([], { hour: '2-digit', minute: '2-digit' })
+    return `<li><div class="title"><span>${esc(e.title)}</span><span class="when">${when}</span></div><div class="path">${e.path.map(esc).join(' <b>›</b> ')}</div></li>`
+  }).join('')
+}
+
+const esc = v => String(v).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]))
+
 function renderCalls() {
   if (!drawer) return
   renderMap()
-  drawer.querySelector('.empty').hidden = calls.length > 0
+  drawer.querySelector('.empty-calls').hidden = calls.length > 0
   drawer.querySelector('.calls').innerHTML = calls.slice(0, 40).map(c => {
     const bad = c.out && (c.out.ok === false || c.out.done === false)
     const t = c.at.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
@@ -594,7 +635,7 @@ function trackActions() {
 export function toggleDrawer() {
   drawer.hidden = !drawer.hidden
   document.body.classList.toggle('drawer-open', !drawer.hidden)
-  if (!drawer.hidden) { renderTools(); renderCalls(); renderMap() }
+  if (!drawer.hidden) { renderTools(); renderCalls(); renderMap(); renderLearned() }
 }
 
 export async function startGuide(opts) {
