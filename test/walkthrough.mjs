@@ -35,6 +35,7 @@ async function step(id, message, act) {
 }
 
 try {
+  await page.addInitScript({ path: join(root, 'vendor', 'webmcp-polyfill.js') })
   await page.goto(`http://localhost:${port}/`)
   await page.waitForFunction(() => window.showme)
   assert.deepEqual(await toolNames(), ['get_ui_map', 'get_current_view', 'highlight_step', 'wait_for_action', 'do_step_for_person'])

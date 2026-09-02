@@ -1,4 +1,4 @@
-const mc = document.modelContext
+const mc = () => document.modelContext
 const registry = new Map()
 const calls = []
 const shownAt = new Map()
@@ -381,7 +381,7 @@ async function register(def, opts = {}) {
   }
   registry.set(def.name, entry)
   if (opts.signal) opts.signal.addEventListener('abort', () => { registry.delete(def.name); renderTools() })
-  if (mc) await mc.registerTool(entry, opts)
+  if (mc()) await mc().registerTool(entry, opts)
   renderTools()
 }
 
@@ -423,7 +423,7 @@ const tagFor = t => {
 async function renderTools() {
   if (!drawer || drawer.hidden) return
   let list
-  try { list = (await mc.getTools()).map(t => ({ name: t.name, annotations: t.annotations })) }
+  try { list = (await mc().getTools()).map(t => ({ name: t.name, annotations: t.annotations })) }
   catch { list = [...registry.values()] }
   const ul = drawer.querySelector('.tools')
   const known = new Set([...ul.children].map(li => li.dataset.name))
@@ -461,8 +461,9 @@ export async function startGuide(opts) {
   buildOverlay()
   buildDrawer()
   trackActions()
-  if (!mc) console.warn('document.modelContext is not available, the guide tools were not registered')
-  else mc.addEventListener('toolchange', renderTools)
+  for (let i = 0; i < 25 && !mc(); i++) await sleep(200)
+  if (!mc()) console.warn('document.modelContext is not available in this browser, the tools are only reachable from this page')
+  else mc().addEventListener('toolchange', renderTools)
   for (const t of baseTools) await register(t)
   window.showme = {
     run: async (name, input) => {

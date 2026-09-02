@@ -80,7 +80,7 @@ styles.css          Tracker look, spotlight overlay, agent drawer
 app.js              Board data, rendering, hash routing, settings behaviour, guide bootstrap
 showme.js           The WebMCP guide layer (tools, overlay, activity drawer)
 agent-console.js    Backup agent talking to the Claude API from the page
-vendor/             Google's official WebMCP polyfill (Apache-2.0), used only when document.modelContext is missing
+vendor/             Google's official WebMCP polyfill (Apache-2.0), injected by the test only; the page never loads it
 serve.mjs           Tiny static server for npm start and the test
 test/walkthrough.mjs  Playwright walkthrough: two full guides, abort on wrong click, policy refusals, dynamic tool list, backup agent
 ```
@@ -88,7 +88,7 @@ test/walkthrough.mjs  Playwright walkthrough: two full guides, abort on wrong cl
 ## Notes
 
 - `wait_for_action` returns `still waiting` after 45 seconds by default and keeps the spotlight on, so agent runtimes with a shorter tool timeout can simply call it again. Adjust the default in `showme.js` if your runtime cuts earlier.
-- The polyfill never runs when the browser implements WebMCP natively; it makes `npm test` work on a stock Chrome and lets the backup agent run anywhere.
+- The page talks to `document.modelContext` only. `npm test` injects Google's polyfill into the test browser so the walkthrough runs on a stock Chrome; the backup agent uses the page's own registry, so it works even where the API is missing. `check.html` tells you whether the browser you are in provides the API.
 - Meridian is fictional. Names, issues and people are invented.
 - Opening `index.html` from disk shows a banner instead of the app: browsers block ES modules on `file://`, so use `npm start` or the deployed URL.
 
