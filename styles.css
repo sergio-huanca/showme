@@ -216,6 +216,9 @@ body.drawer-open .modal-backdrop { right: 360px; }
 .agent-drawer .tag.ro { background: #e3fcef; color: #006644; }
 .agent-drawer .tag.wait { background: #fff0b3; color: #7f5f01; }
 .agent-drawer .tag.guide { background: #eae6ff; color: #5e4db2; }
+.agent-drawer .tag.bad { background: #ffebe6; color: #bf2600; }
+.agent-drawer .api { padding: 10px 14px 0; font-size: 12px; color: var(--muted); }
+.agent-drawer .tools .err { font-size: 11px; color: var(--danger); margin: -2px 0 6px 8px; white-space: pre-wrap; }
 .agent-drawer .calls { flex: 1; overflow: auto; margin: 0; padding: 0 14px 14px; list-style: none; }
 .agent-drawer .calls li { padding: 6px 0; border-bottom: 1px solid var(--line); }
 .agent-drawer .calls .who { font-size: 11px; color: var(--muted); }

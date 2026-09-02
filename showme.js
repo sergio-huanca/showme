@@ -366,7 +366,6 @@ async function register(def, opts = {}) {
     name: def.name,
     description: def.description,
     inputSchema: def.inputSchema,
-    annotations: def.annotations,
     execute: async (input, ctx) => {
       const c = { name: def.name, input: input || {}, at: new Date(), who: 'agent' }
       calls.unshift(c)
@@ -379,9 +378,24 @@ async function register(def, opts = {}) {
       return JSON.stringify(out)
     },
   }
+  if (def.annotations) entry.annotations = def.annotations
   registry.set(def.name, entry)
   if (opts.signal) opts.signal.addEventListener('abort', () => { registry.delete(def.name); renderTools() })
-  if (mc()) await mc().registerTool(entry, opts)
+  if (mc()) {
+    const variants = [def.annotations, def.annotations && def.annotations.readOnlyHint ? { readOnlyHint: true } : null, null]
+    for (const annotations of variants) {
+      const tool = { name: entry.name, description: entry.description, inputSchema: entry.inputSchema, execute: entry.execute }
+      if (annotations) tool.annotations = annotations
+      try {
+        await mc().registerTool(tool, opts.signal ? { signal: opts.signal } : undefined)
+        entry.registered = true
+        entry.error = null
+        break
+      } catch (e) {
+        entry.error = e && e.message ? e.message : String(e)
+      }
+    }
+  }
   renderTools()
 }
 
@@ -403,6 +417,7 @@ function buildDrawer() {
   drawer.className = 'agent-drawer'
   drawer.hidden = true
   drawer.innerHTML = `<header><span class="dot"></span>Agent activity<button class="icon-btn" title="Close"><svg><use href="#i-x"/></svg></button></header>
+<div class="api"></div>
 <h3>Tools the agent can see right now</h3>
 <ul class="tools"></ul>
 <h3>Calls</h3>
@@ -422,12 +437,23 @@ const tagFor = t => {
 
 async function renderTools() {
   if (!drawer || drawer.hidden) return
-  let list
-  try { list = (await mc().getTools()).map(t => ({ name: t.name, annotations: t.annotations })) }
-  catch { list = [...registry.values()] }
+  let listed = null
+  try { listed = new Set((await mc().getTools()).map(t => t.name)) } catch {}
+  const api = drawer.querySelector('.api')
+  if (!mc()) api.textContent = 'This browser does not expose document.modelContext. Tools are only reachable from this page.'
+  else if (listed) api.textContent = `The browser lists ${listed.size} tool${listed.size === 1 ? '' : 's'} from this page.`
+  else api.textContent = 'document.modelContext is present. getTools is not available here, showing what the page registered.'
   const ul = drawer.querySelector('.tools')
   const known = new Set([...ul.children].map(li => li.dataset.name))
-  ul.innerHTML = list.map(t => `<li data-name="${t.name}" class="${known.size && !known.has(t.name) ? 'new' : ''}">${t.name}${tagFor(t)}</li>`).join('')
+  ul.innerHTML = [...registry.values()].map(t => {
+    let state = ''
+    if (mc()) {
+      const seen = listed ? listed.has(t.name) : t.registered
+      if (!seen) state = `<span class="tag bad">${t.error ? 'rejected' : 'not listed'}</span>`
+    }
+    const err = t.error && !(listed && listed.has(t.name)) ? `<div class="err">${t.error}</div>` : ''
+    return `<li data-name="${t.name}" class="${known.size && !known.has(t.name) ? 'new' : ''}">${t.name}${tagFor(t)}${state}</li>${err}`
+  }).join('')
 }
 
 function renderCalls() {
