@@ -234,7 +234,8 @@ function waitFor({ element_id, timeout_seconds }, ctx) {
     }
     const onDown = e => {
       const label = e.target.closest && e.target.closest('label')
-      const inside = el.contains(e.target) || (label && label.contains(el)) || ui.contains(e.target) || drawer.contains(e.target)
+      const neutral = app.neutral && e.target.closest && e.target.closest(app.neutral)
+      const inside = el.contains(e.target) || (label && label.contains(el)) || ui.contains(e.target) || drawer.contains(e.target) || neutral
       if (!inside) fail('The person clicked somewhere else: ' + whatWasClicked(e.target))
     }
     const onAbort = () => finish({ done: false, reason: 'cancelled by the agent' })

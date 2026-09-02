@@ -75,8 +75,14 @@ try {
   assert.ok((await toolNames()).includes('end_walkthrough'))
   await act('board.more.configure', () => click('board.more.configure'))
   await page.click('#agent-activity-btn')
-  await page.waitForTimeout(400)
+  await page.waitForTimeout(700)
   assert.equal(await page.locator('.agent-drawer .tools li').count(), 5)
+  const aligned = await page.evaluate(() => {
+    const spot = document.querySelector('.showme-spot')
+    const r = document.querySelector('[data-guide="boardsettings.tab.columns"]').getBoundingClientRect()
+    return !spot.hidden && Math.abs(parseFloat(spot.style.left) - (r.left - 6)) < 2 && Math.abs(parseFloat(spot.style.top) - (r.top - 6)) < 2
+  })
+  assert.ok(aligned, 'spotlight follows the Columns tab after the drawer opens')
   const mapBefore = Number(/(\d+) elements/.exec(await page.textContent('.agent-drawer .map'))[1])
   assert.ok(mapBefore > 100, 'map line shows a real element count')
   await shot('drawer')

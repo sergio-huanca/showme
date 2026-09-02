@@ -452,6 +452,7 @@ go(location.hash)
 
 startGuide({
   app: 'Meridian',
+  neutral: '#agent-activity-btn',
   state: () => ({
     board_columns: columns.map(c => c.max ? `${c.name} (max ${c.max})` : c.name),
     open_issue: issue && !issueModal.hidden ? { key: keyOf(issue), title: issue.t, type: issue.type, status: issueCol.statuses[0], labels: issue.labels, watchers: issue.watchers.map(w => people[w] || w), flagged: !!issue.flag, assignee: people[issue.who] || 'Unassigned' } : null,
