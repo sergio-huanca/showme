@@ -57,6 +57,11 @@ try {
   r = await step('board.more.configure', 'Choose Configure board.', () => click('board.more.configure'))
   assert.equal(r.now.screen.id, 'board-settings')
 
+  await page.click('#agent-activity-btn')
+  await page.waitForTimeout(400)
+  assert.equal(await page.locator('.agent-drawer .tools li').count(), 6)
+  await shot('drawer')
+
   r = await step('boardsettings.tab.columns', 'Open the Columns tab.', () => click('boardsettings.tab.columns'))
   assert.equal(r.now.panel, 'columns')
 
@@ -122,6 +127,35 @@ try {
   assert.ok(r.now.app_state.notification_recipients['Issue assigned'].includes('All watchers'))
   await run('end_walkthrough')
   await shot('notifications-saved')
+
+  const apiCalls = []
+  await page.route('https://api.anthropic.com/v1/messages', route => {
+    const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'POST' }
+    if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors })
+    apiCalls.push({ headers: route.request().headers(), body: route.request().postDataJSON() })
+    const reply = apiCalls.length === 1
+      ? { content: [{ type: 'text', text: 'Let me show you.' }, { type: 'tool_use', id: 'toolu_1', name: 'highlight_step', input: { element_id: 'board.more', message: 'Click the three dots.' } }], stop_reason: 'tool_use' }
+      : { content: [{ type: 'text', text: 'Done, that is the menu.' }], stop_reason: 'end_turn' }
+    return route.fulfill({ status: 200, contentType: 'application/json', headers: cors, body: JSON.stringify(reply) })
+  })
+  await page.click('[data-guide="sidebar.board.kanban"]')
+  await page.click('.agent-drawer summary')
+  await page.fill('.agent-drawer .key', 'sk-ant-api-test')
+  await page.fill('.agent-drawer textarea', 'How do I configure the board?')
+  await page.click('.agent-drawer .send')
+  await page.waitForSelector('.agent-drawer .msg:has-text("Done, that is the menu.")')
+  assert.equal(apiCalls.length, 2)
+  assert.equal(apiCalls[0].headers['x-api-key'], 'sk-ant-api-test')
+  assert.equal(apiCalls[0].body.model, 'claude-opus-5')
+  assert.equal(apiCalls[0].body.fallbacks, 'default')
+  assert.ok(apiCalls[0].body.tools.some(x => x.name === 'wait_for_action'))
+  const last = apiCalls[1].body.messages.at(-1)
+  assert.equal(last.content[0].type, 'tool_result')
+  assert.equal(JSON.parse(last.content[0].content).ok, true)
+  assert.ok(apiCalls[1].body.tools.some(x => x.name === 'end_walkthrough'))
+  assert.equal((await run('get_current_view')).walkthrough.highlighted, 'board.more')
+  await page.waitForTimeout(500)
+  await shot('console')
 
   console.log(`PASS  ${n} screenshots in test/shots`)
 } finally {

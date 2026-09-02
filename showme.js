@@ -105,7 +105,16 @@ function hintFor(el) {
 }
 
 function place() {
-  if (!walk || !walk.el) return
+  if (!walk) return
+  requestAnimationFrame(place)
+  if (!walk.el) return
+  if (!visible(walk.el)) {
+    spot.hidden = true
+    cursor.classList.remove('on')
+    if (!walk.hideAt) walk.hideAt = performance.now() + 900
+    else if (performance.now() > walk.hideAt) clearSpot()
+    return
+  }
   const r = walk.el.getBoundingClientRect()
   const pad = 6
   spot.style.top = r.top - pad + 'px'
@@ -119,7 +128,6 @@ function place() {
   const pos = `translate(${r.left + r.width * 0.6}px, ${r.top + r.height * 0.55}px)`
   cursor.style.setProperty('--pos', pos)
   cursor.style.transform = pos
-  requestAnimationFrame(place)
 }
 
 function startWalk() {
@@ -163,6 +171,7 @@ async function highlight({ element_id, message, step }) {
   walk.step = step || walk.step + 1
   walk.target = element_id
   walk.el = el
+  walk.hideAt = null
   el.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' })
   spot.hidden = false
   caption.hidden = false
@@ -390,7 +399,7 @@ function buildDrawer() {
 <h3>Calls</h3>
 <div class="empty">No calls yet. Ask your agent how to do something in Meridian.</div>
 <ul class="calls"></ul>`
-  drawer.querySelector('header .icon-btn').addEventListener('click', () => { drawer.hidden = true })
+  drawer.querySelector('header .icon-btn').addEventListener('click', () => { drawer.hidden = true; document.body.classList.remove('drawer-open') })
   document.body.appendChild(drawer)
 }
 
@@ -434,6 +443,7 @@ function trackActions() {
 
 export function toggleDrawer() {
   drawer.hidden = !drawer.hidden
+  document.body.classList.toggle('drawer-open', !drawer.hidden)
   if (!drawer.hidden) { renderTools(); renderCalls() }
 }
 
