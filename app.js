@@ -80,7 +80,7 @@ function findIssue(key) {
 function card(c, col) {
   const avatar = c.who ? `<span class="avatar sm">${c.who}</span>` : '<svg class="muted"><use href="#i-user"/></svg>'
   const labels = (c.labels || []).map(l => `<span class="chip">${esc(l)}</span>`).join('')
-  return `<div class="card${c.flag ? ' flag' : ''}" data-open-issue="${keyOf(c)}" data-guide="card.${keyOf(c)}" data-guide-delegable data-guide-desc="Issue card ${keyOf(c)} '${esc(c.t)}' in the ${esc(col.name)} column. Click it to open the issue panel">
+  return `<div class="card${c.flag ? ' flag' : ''}" data-open-issue="${keyOf(c)}" data-guide="card.${keyOf(c)}" data-guide-label="Card ${keyOf(c)}" data-guide-delegable data-guide-desc="Issue card ${keyOf(c)} '${esc(c.t)}' in the ${esc(col.name)} column. Click it to open the issue panel">
     <div class="card-title">${esc(c.t)}</div>
     ${c.e ? `<span class="epic ${c.e[1]}">${esc(c.e[0])}</span>` : ''}
     ${labels ? `<div class="chips">${labels}</div>` : ''}
@@ -105,7 +105,7 @@ function renderBoard() {
 function renderForYou() {
   const mine = []
   for (const col of columns) for (const c of cards[col.id] || []) if (c.who === 'SH') mine.push({ c, col })
-  $('#foryou-list').innerHTML = mine.map(({ c, col }) => `<div class="issue-row" data-open-issue="${keyOf(c)}" data-guide="foryou.${keyOf(c)}" data-guide-delegable data-guide-desc="Issue ${keyOf(c)} '${esc(c.t)}' in the For you list (${esc(col.name)}). Click it to open the issue panel"><span class="type ${c.type}"></span><span class="key">${keyOf(c)}</span>${esc(c.t)}</div>`).join('')
+  $('#foryou-list').innerHTML = mine.map(({ c, col }) => `<div class="issue-row" data-open-issue="${keyOf(c)}" data-guide="foryou.${keyOf(c)}" data-guide-label="${keyOf(c)} in For you" data-guide-delegable data-guide-desc="Issue ${keyOf(c)} '${esc(c.t)}' in the For you list (${esc(col.name)}). Click it to open the issue panel"><span class="type ${c.type}"></span><span class="key">${keyOf(c)}</span>${esc(c.t)}</div>`).join('')
 }
 
 function renderColumnsConfig() {

@@ -314,12 +314,23 @@ const untilVisible = async (el, ms) => {
   return visible(el)
 }
 
+const firstClause = d => {
+  let out = d.split(/[.,(:]/)[0].trim()
+  if (out.length > 34) out = out.slice(0, 34).replace(/\s+\S*$/, '')
+  return out
+}
+
 const labelOf = el => {
   if (!el) return '?'
   if (el.dataset.guideLabel) return el.dataset.guideLabel
+  if (el.matches('input, select, textarea')) {
+    const lab = el.closest('label')
+    const own = lab ? [...lab.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent.trim()).join(' ').trim() : ''
+    return own || el.placeholder || firstClause(desc(el))
+  }
   const text = el.textContent.trim().replace(/\s+/g, ' ')
-  if (text && text.length <= 28) return text
-  return desc(el).split(/[.,(]/)[0].trim().slice(0, 40)
+  if (text.length >= 3 && text.length <= 28 && !/^\d+$/.test(text)) return text
+  return firstClause(desc(el))
 }
 
 function learned() {
