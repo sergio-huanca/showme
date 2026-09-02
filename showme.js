@@ -207,7 +207,7 @@ function waitFor({ element_id, timeout_seconds }, ctx) {
     if (walk && walk.target === element_id) markDone()
     return { done: true, action: 'already done', note: 'The person did this step before you asked to wait.', element_id, now: view() }
   }
-  if (pending) pending.cancel('a newer wait_for_action replaced it')
+  if (pending) pending.cancel('a newer wait replaced it')
   const seconds = Number(timeout_seconds) > 0 ? Number(timeout_seconds) : 45
   const isText = el.matches('input:not([type=checkbox]):not([type=radio]), textarea')
   const isToggle = el.matches('input[type=checkbox], input[type=radio], select')
@@ -263,7 +263,7 @@ function waitFor({ element_id, timeout_seconds }, ctx) {
     timer = setTimeout(() => finish({
       done: false,
       reason: 'still waiting',
-      note: `No action after ${seconds}s. The highlight stays on. Call wait_for_action again with the same element_id if the person is still on this step.`,
+      note: `No action after ${seconds}s. The highlight stays on.`,
     }), seconds * 1000)
     pending = { cancel: reason => finish({ done: false, reason }) }
   })
@@ -284,8 +284,8 @@ async function moveCursor(el) {
 async function doStep({ element_id, value }) {
   const el = q(element_id)
   if (!el) return { ok: false, error: `No element with id "${element_id}". Call get_ui_map to see the ids.` }
-  if ('guideDanger' in el.dataset) return { ok: false, refused: true, reason: `${app.app} policy: "${desc(el)}" is irreversible and is never done by an agent. Guide the person with highlight_step and wait_for_action instead.` }
-  if (!('guideDelegable' in el.dataset)) return { ok: false, refused: true, reason: `${app.app} policy: "${desc(el)}" is a change the person makes themselves. Agents may only navigate and type into search boxes here. Guide them with highlight_step and wait_for_action instead.` }
+  if ('guideDanger' in el.dataset) return { ok: false, refused: true, reason: `${app.app} policy: "${desc(el)}" is irreversible and is never done by an agent. Guide the person with run_walkthrough instead.` }
+  if (!('guideDelegable' in el.dataset)) return { ok: false, refused: true, reason: `${app.app} policy: "${desc(el)}" is a change the person makes themselves. Agents may only navigate and type into search boxes here. Guide them with run_walkthrough instead.` }
   if (!visible(el)) return { ok: false, error: whyHidden(el) }
   el.scrollIntoView({ block: 'center', behavior: 'smooth' })
   await moveCursor(el)
@@ -404,9 +404,9 @@ const elementId = { type: 'string', description: 'Element id from get_ui_map, fo
 const baseTools = [
   {
     name: 'get_ui_map',
-    description: 'Map of every screen, panel, menu and interactive element of Meridian, with the ids the other tools accept and short instructions on how to guide. Call it once at the start of a guide. Read-only.',
+    description: 'Map of every screen, panel, menu and interactive element of Meridian, with the ids the other tools accept and short instructions on how to guide. Call it once at the start of a guide. Read-only; names typed by people (columns, issue titles) appear in it.',
     inputSchema: objSchema(),
-    annotations: { readOnlyHint: true },
+    annotations: { readOnlyHint: true, untrustedContentHint: true },
     execute: uiMap,
   },
   {
@@ -488,6 +488,7 @@ async function register(def, opts = {}) {
         await mc().registerTool(tool, opts.signal ? { signal: opts.signal } : undefined)
         entry.registered = true
         entry.error = null
+        entry.dropped = Object.keys(def.annotations || {}).filter(k => !annotations || !(k in annotations))
         break
       } catch (e) {
         entry.error = e && e.message ? e.message : String(e)
@@ -554,7 +555,8 @@ async function renderTools() {
       if (!seen) state = `<span class="tag bad">${t.error ? 'rejected' : 'not listed'}</span>`
     }
     const err = t.error && !(listed && listed.has(t.name)) ? `<div class="err">${t.error}</div>` : ''
-    return `<li data-name="${t.name}" class="${known.size && !known.has(t.name) ? 'new' : ''}">${t.name}${tagFor(t)}${state}</li>${err}`
+    const note = t.dropped && t.dropped.length ? `<div class="note">registered without ${t.dropped.join(', ')}: this browser did not accept it</div>` : ''
+    return `<li data-name="${t.name}" class="${known.size && !known.has(t.name) ? 'new' : ''}">${t.name}${tagFor(t)}${state}</li>${err}${note}`
   }).join('')
 }
 
@@ -607,15 +609,17 @@ export async function startGuide(opts) {
   else if ('ontoolchange' in m) m.ontoolchange = renderTools
   for (const t of baseTools) await register(t)
   window.showme = {
-    run: async (name, input) => {
-      const entry = registry.get(name)
-      if (!entry) return { ok: false, error: 'unknown tool ' + name }
-      return JSON.parse(await entry.execute(input || {}, {}))
-    },
-    tools: () => [...registry.values()].map(t => ({ name: t.name, description: t.description, inputSchema: t.inputSchema })),
     state: () => ({ target: walk ? walk.target : null, step: walk ? walk.step : 0, run: walk && walk.run ? { index: walk.run.index, status: walk.run.status } : null }),
-    drawer: () => drawer,
-    log: (name, input, out, who) => { calls.unshift({ name, input, out, at: new Date(), who }); renderCalls() },
   }
-  return window.showme
+}
+
+export const drawerHost = () => drawer
+
+export const fallback = {
+  tools: () => [...registry.values()].map(t => ({ name: t.name, description: t.description, inputSchema: t.inputSchema })),
+  run: async (name, input) => {
+    const entry = registry.get(name)
+    if (!entry) return { ok: false, error: 'unknown tool ' + name }
+    return JSON.parse(await entry.execute(input || {}, {}))
+  },
 }

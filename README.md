@@ -32,20 +32,20 @@ Follow the spotlight. Click the wrong thing on purpose once, the agent notices. 
 ```
 npm install
 npm start          # http://localhost:8080
-npm test           # Playwright walkthrough against your installed Chrome, screenshots in test/shots
+npm test           # Playwright walkthrough against your installed Chrome, every call through document.modelContext, screenshots in test/shots
 ```
 
 ## How WebMCP is used
 
 | Tool | What it does | WebMCP detail |
 |---|---|---|
-| `get_ui_map` | Every screen, panel, menu and element with ids and short guiding rules | `readOnlyHint: true` |
+| `get_ui_map` | Every screen, panel, menu and element with ids and short guiding rules, read from the live DOM | `readOnlyHint`, `untrustedContentHint` (column names and issue titles are typed by people) |
 | `get_current_view` | Screen, panel, open menu or dialog, visible ids, walkthrough state, app data snapshot | `readOnlyHint`, `untrustedContentHint` (echoes user-typed values) |
 | `run_walkthrough` | Takes the whole path. The page spotlights each element with the agent's message, waits for the person to click, tick or type, then moves on by itself. Returns `completed`, `interrupted` with the reason (wrong click, stopped), `blocked` when a step is unreachable, or `in_progress` after `timeout_seconds` while the walkthrough keeps running | long-running `execute` that honours the `AbortSignal`, returns partial progress and the new view so the agent re-plans instead of guessing |
 | `do_step_for_person` | Performs a step only if the site allows it; refuses configuration changes with the policy text | policy lives in the markup, not in the prompt |
 | `end_walkthrough` | Clears the guide | registered with an `AbortController` only while a walkthrough is active, so the agent's tool list changes live (`toolchange`) |
 
-All of it is in [`showme.js`](showme.js). Registration goes through `document.modelContext.registerTool`; the **Agent activity** drawer renders `document.modelContext.getTools()` and refreshes on `toolchange`, so a person can watch tools appear and disappear while the agent works.
+All of it is in [`showme.js`](showme.js). Registration goes through `document.modelContext.registerTool`; if a browser rejects an annotation the tool is registered again without it and the drawer says so. The **Agent activity** drawer renders `document.modelContext.getTools()` and refreshes on `toolchange`, so a person can watch tools appear and disappear while the agent works. Nothing in the page talks to the tools except through that API: the test and the backup agent discover with `getTools()` and run with `executeTool()`, and the page-side registry is only a fallback for browsers without the API.
 
 ![Agent activity drawer after a column was added](docs/drawer.png)
 

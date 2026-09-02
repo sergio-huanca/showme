@@ -16,8 +16,14 @@ page.on('console', m => { if (m.type() === 'error') console.error('console error
 
 let n = 0
 const shot = name => page.screenshot({ path: join(shots, `${String(++n).padStart(2, '0')}-${name}.png`) })
-const run = (name, input) => page.evaluate(([t, i]) => window.showme.run(t, i), [name, input || {}])
-const toolNames = () => page.evaluate(() => window.showme.tools().map(t => t.name))
+const run = (name, input) => page.evaluate(async ([t, i]) => {
+  const mc = document.modelContext
+  const tool = (await mc.getTools()).find(x => x.name === t)
+  if (!tool) return { ok: false, error: 'not registered with the browser: ' + t }
+  const out = await mc.executeTool(tool, JSON.stringify(i))
+  return typeof out === 'string' ? JSON.parse(out) : out
+}, [name, input || {}])
+const toolNames = () => page.evaluate(async () => (await document.modelContext.getTools()).map(t => t.name))
 const click = id => page.click(`[data-guide="${id}"]`)
 const sel = id => `[data-guide="${id}"]`
 const plan = (...ids) => ids.map(id => ({ element_id: id, message: `Now ${id.split('.').pop().replace(/-/g, ' ')}.` }))

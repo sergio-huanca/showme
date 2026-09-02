@@ -1,3 +1,5 @@
+import { drawerHost, fallback } from './showme.js'
+
 const KEY = 'showme.anthropic.key'
 const MODEL = 'claude-opus-5'
 
@@ -33,7 +35,7 @@ async function discover() {
     } catch {}
   }
   via = 'page registry'
-  return window.showme.tools()
+  return fallback.tools()
 }
 
 async function execute(name, input) {
@@ -49,7 +51,7 @@ async function execute(name, input) {
       }
     }
   }
-  return window.showme.run(name, input)
+  return fallback.run(name, input)
 }
 
 async function ask(key, messages) {
@@ -65,7 +67,7 @@ async function ask(key, messages) {
 }
 
 export function mountConsole() {
-  const host = window.showme.drawer()
+  const host = drawerHost()
   const box = document.createElement('div')
   box.className = 'console'
   box.innerHTML = `<details>
