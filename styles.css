@@ -226,6 +226,11 @@ body.drawer-open .modal-backdrop { right: 360px; }
 .agent-drawer .calls .res { color: var(--muted); font-size: 12px; white-space: pre-wrap; word-break: break-word; }
 .agent-drawer .calls .res.bad { color: var(--danger); }
 .agent-drawer .empty { color: var(--muted); padding: 4px 14px 12px; }
+.agent-drawer .map { padding: 0 14px; font-size: 12px; color: var(--muted); }
+.agent-drawer .mapdump { padding: 4px 14px 0; font-size: 12px; }
+.agent-drawer .mapdump summary { cursor: pointer; color: var(--muted); }
+.agent-drawer .mapdump pre { max-height: 220px; overflow: auto; background: var(--panel); padding: 8px; border-radius: 4px; font-size: 11px; margin: 6px 0 0; white-space: pre-wrap; word-break: break-word; }
+.agent-drawer .console .via { font-size: 11px; margin: 4px 0; }
 .agent-drawer .console { border-top: 1px solid var(--line); padding: 10px 14px 14px; }
 .agent-drawer .console .thread { max-height: 220px; overflow: auto; margin: 8px 0; display: flex; flex-direction: column; gap: 6px; }
 .agent-drawer .console .msg { padding: 6px 8px; border-radius: 6px; background: var(--panel); white-space: pre-wrap; }

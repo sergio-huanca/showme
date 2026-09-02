@@ -69,7 +69,15 @@ The map is built from the live DOM on every call, so dynamically rendered elemen
 
 ## Backup agent
 
-The Agent activity drawer has a small **Backup agent** panel that runs Claude directly from the page against the same tools, through `document.modelContext`. Paste an Anthropic API key (it stays in your browser's localStorage) and ask the same questions. It exists to prove the tools are agent-agnostic and as a fallback when a WebMCP browser is not at hand. It is covered by a mocked run in the test; a live run needs a key.
+The Agent activity drawer has a small **Backup agent** panel that runs Claude directly from the page. It discovers the tools with `document.modelContext.getTools()` and runs them with `document.modelContext.executeTool()`, the same two doors an external agent uses, and only falls back to the page's own registry where the browser lacks them. Paste an Anthropic API key (it stays in your browser's localStorage) and ask the same questions. It exists to prove the tools are agent-agnostic and as a fallback when a WebMCP browser is not at hand. It is covered by a mocked run in the test; a live run needs a key.
+
+The drawer also shows the size of the map the site publishes, read from the live page on every refresh (it grows when you add a column or open a dialog), and a dump of exactly what `get_ui_map` returns.
+
+## What we deliberately did not use
+
+- **Declarative tools** (`<form toolname>`): ChatGPT's browser only supports the imperative API, and a walkthrough is not a form submission.
+- **Cross-origin tools** (`exposedTo`, `allow="tools"` iframes): not available in ChatGPT's browser, and the guide layer lives in the page it annotates.
+- **`requestUserInteraction`**: still a proposal. The site's refusal policy in `do_step_for_person` is the version that works today.
 
 ## Files
 

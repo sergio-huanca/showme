@@ -77,6 +77,8 @@ try {
   await page.click('#agent-activity-btn')
   await page.waitForTimeout(400)
   assert.equal(await page.locator('.agent-drawer .tools li').count(), 5)
+  const mapBefore = Number(/(\d+) elements/.exec(await page.textContent('.agent-drawer .map'))[1])
+  assert.ok(mapBefore > 100, 'map line shows a real element count')
   await shot('drawer')
   await act('boardsettings.tab.columns', () => click('boardsettings.tab.columns'))
   await act('boardsettings.columns.add', () => click('boardsettings.columns.add'))
@@ -96,6 +98,12 @@ try {
   assert.equal(r.status, 'completed')
   assert.ok(r.now.app_state.board_columns.includes('Code Review'))
   await page.waitForTimeout(600)
+  const mapAfter = Number(/(\d+) elements/.exec(await page.textContent('.agent-drawer .map'))[1])
+  assert.ok(mapAfter > mapBefore, `map grew after adding a column (${mapBefore} -> ${mapAfter})`)
+  await page.click('.agent-drawer .mapdump summary')
+  await page.waitForFunction(() => document.querySelector('.agent-drawer .mapdump pre').textContent.length > 100)
+  assert.match(await page.textContent('.agent-drawer .mapdump pre'), /"board\.more"/)
+  await page.click('.agent-drawer .mapdump summary')
   await shot('column-added')
 
   const refused = await run('do_step_for_person', { element_id: 'boardsettings.columns.create' })
@@ -192,7 +200,7 @@ try {
       : { content: [{ type: 'text', text: 'Done, that is the menu.' }], stop_reason: 'end_turn' }
     return route.fulfill({ status: 200, contentType: 'application/json', headers: cors, body: JSON.stringify(reply) })
   })
-  await page.click('.agent-drawer summary')
+  await page.click('.agent-drawer .console summary')
   await page.fill('.agent-drawer .key', 'sk-ant-api-test')
   await page.fill('.agent-drawer textarea', 'How do I configure the board?')
   await page.click('.agent-drawer .send')
@@ -207,6 +215,7 @@ try {
   assert.equal(last.content[0].type, 'tool_result')
   assert.equal(JSON.parse(last.content[0].content).status, 'completed')
   assert.ok(apiCalls[1].body.tools.some(x => x.name === 'end_walkthrough'))
+  assert.equal(await page.getAttribute('.agent-drawer .console', 'data-via'), 'document.modelContext')
   await page.waitForTimeout(500)
   await shot('console')
 

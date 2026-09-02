@@ -21,8 +21,39 @@ function headers(key) {
   return h
 }
 
+let via = 'page registry'
+
+async function discover() {
+  const mc = document.modelContext
+  if (mc && typeof mc.getTools === 'function') {
+    try {
+      const tools = await mc.getTools()
+      via = 'document.modelContext'
+      return tools
+    } catch {}
+  }
+  via = 'page registry'
+  return window.showme.tools()
+}
+
+async function execute(name, input) {
+  const mc = document.modelContext
+  if (via === 'document.modelContext' && typeof mc.executeTool === 'function') {
+    const tool = (await mc.getTools()).find(t => t.name === name)
+    if (tool) {
+      try {
+        const out = await mc.executeTool(tool, JSON.stringify(input || {}))
+        return typeof out === 'string' ? JSON.parse(out) : out
+      } catch (e) {
+        via = 'page registry (executeTool failed: ' + e.message + ')'
+      }
+    }
+  }
+  return window.showme.run(name, input)
+}
+
 async function ask(key, messages) {
-  const tools = window.showme.tools().map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema }))
+  const tools = (await discover()).map(t => ({ name: t.name, description: t.description, input_schema: t.inputSchema || { type: 'object', properties: {} } }))
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: headers(key),
@@ -41,6 +72,7 @@ export function mountConsole() {
 <summary>Backup agent · Claude talks to the same tools from this page</summary>
 <input class="key" type="password" placeholder="Anthropic API key (kept in this browser only)" autocomplete="off">
 <div class="thread"></div>
+<div class="via muted"></div>
 <textarea placeholder="Ask how to do something, e.g. How do I add a Code Review column to the board?"></textarea>
 <div class="row"><button class="btn primary send">Ask</button><button class="btn subtle clear">Clear</button></div>
 </details>`
@@ -48,6 +80,8 @@ export function mountConsole() {
 
   const keyInput = box.querySelector('.key')
   const thread = box.querySelector('.thread')
+  const viaLine = box.querySelector('.via')
+  const showVia = () => { viaLine.textContent = 'Tools discovered and executed through ' + via; box.dataset.via = via }
   const textarea = box.querySelector('textarea')
   const send = box.querySelector('.send')
   let messages = []
@@ -69,6 +103,7 @@ export function mountConsole() {
     show(text, 'me')
     for (let i = 0; i < 40; i++) {
       const res = await ask(keyInput.value.trim(), messages)
+      showVia()
       if (res.stop_reason === 'refusal') { show('The model declined this request.', 'err'); return }
       messages.push({ role: 'assistant', content: res.content })
       for (const b of res.content) if (b.type === 'text' && b.text.trim()) show(b.text.trim())
@@ -76,7 +111,8 @@ export function mountConsole() {
       const results = []
       for (const b of res.content) {
         if (b.type !== 'tool_use') continue
-        const out = await window.showme.run(b.name, b.input)
+        const out = await execute(b.name, b.input)
+        showVia()
         results.push({ type: 'tool_result', tool_use_id: b.id, content: JSON.stringify(out) })
       }
       messages.push({ role: 'user', content: results })

@@ -517,10 +517,14 @@ function buildDrawer() {
 <div class="api"></div>
 <h3>Tools the agent can see right now</h3>
 <ul class="tools"></ul>
+<h3>The map the site publishes</h3>
+<div class="map"></div>
+<details class="mapdump"><summary>Show exactly what get_ui_map returns</summary><pre></pre></details>
 <h3>Calls</h3>
 <div class="empty">No calls yet. Ask your agent how to do something in Meridian.</div>
 <ul class="calls"></ul>`
   drawer.querySelector('header .icon-btn').addEventListener('click', () => { drawer.hidden = true; document.body.classList.remove('drawer-open') })
+  drawer.querySelector('.mapdump').addEventListener('toggle', e => { if (e.target.open) e.target.querySelector('pre').textContent = JSON.stringify(uiMap(), null, 2) })
   document.body.appendChild(drawer)
 }
 
@@ -553,8 +557,19 @@ async function renderTools() {
   }).join('')
 }
 
+function renderMap() {
+  if (!drawer || drawer.hidden) return
+  const m = uiMap()
+  const all = [...m.screens.flatMap(x => x.elements), ...m.dialogs.flatMap(x => x.elements), ...m.always_available]
+  const count = (k) => all.filter(e => e[k]).length
+  drawer.querySelector('.map').textContent = `Right now: ${all.length} elements across ${m.screens.length} screens and ${m.dialogs.length} dialogs, read from the live page. ${count('visible')} visible, ${count('agent_may_do_this')} the agent may do for you, ${count('irreversible')} irreversible.`
+  const dump = drawer.querySelector('.mapdump')
+  if (dump.open) dump.querySelector('pre').textContent = JSON.stringify(m, null, 2)
+}
+
 function renderCalls() {
   if (!drawer) return
+  renderMap()
   drawer.querySelector('.empty').hidden = calls.length > 0
   drawer.querySelector('.calls').innerHTML = calls.slice(0, 40).map(c => {
     const bad = c.out && (c.out.ok === false || c.out.done === false)
@@ -576,7 +591,7 @@ function trackActions() {
 export function toggleDrawer() {
   drawer.hidden = !drawer.hidden
   document.body.classList.toggle('drawer-open', !drawer.hidden)
-  if (!drawer.hidden) { renderTools(); renderCalls() }
+  if (!drawer.hidden) { renderTools(); renderCalls(); renderMap() }
 }
 
 export async function startGuide(opts) {
