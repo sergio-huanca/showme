@@ -1,0 +1,13 @@
+{
+  "name": "showme",
+  "private": true,
+  "type": "module",
+  "description": "Agents that teach instead of doing: a WebMCP guide layer on a Jira-style tracker",
+  "scripts": {
+    "start": "node serve.mjs",
+    "test": "node test/walkthrough.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
+}
