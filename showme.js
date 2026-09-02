@@ -167,7 +167,10 @@ function endWalk(reason) {
   const steps = walk ? walk.step : 0
   clearSpot()
   if (pending) pending.cancel('the walkthrough ended: ' + reason)
-  if (walk) walk.end.abort()
+  if (walk) {
+    walk.end.abort()
+    try { if (mc() && typeof mc().unregisterTool === 'function') mc().unregisterTool(endTool.name) } catch {}
+  }
   walk = null
   return { ok: true, steps_completed: steps, reason }
 }
@@ -488,8 +491,10 @@ export async function startGuide(opts) {
   buildDrawer()
   trackActions()
   for (let i = 0; i < 25 && !mc(); i++) await sleep(200)
-  if (!mc()) console.warn('document.modelContext is not available in this browser, the tools are only reachable from this page')
-  else mc().addEventListener('toolchange', renderTools)
+  const m = mc()
+  if (!m) console.warn('document.modelContext is not available in this browser, the tools are only reachable from this page')
+  else if (typeof m.addEventListener === 'function') m.addEventListener('toolchange', renderTools)
+  else if ('ontoolchange' in m) m.ontoolchange = renderTools
   for (const t of baseTools) await register(t)
   window.showme = {
     run: async (name, input) => {
