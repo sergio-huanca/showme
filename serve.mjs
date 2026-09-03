@@ -18,6 +18,7 @@ export function serve(root, port = 0) {
   const server = createServer(async (req, res) => {
     let path = decodeURIComponent(new URL(req.url, 'http://localhost').pathname)
     if (path.endsWith('/')) path += 'index.html'
+    else if (!extname(path)) { res.writeHead(301, { location: path + '/' }); res.end(); return }
     const file = join(root, normalize(path))
     if (!file.startsWith(root)) { res.writeHead(403); res.end(); return }
     try {

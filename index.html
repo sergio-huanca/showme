@@ -3,377 +3,268 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Meridian · ATL Kanban board</title>
+<title>Northbank · Accounts</title>
+<link rel="stylesheet" href="showme.css">
 <link rel="stylesheet" href="styles.css">
 <link rel="icon" href="data:,">
 </head>
 <body>
 <svg hidden><defs>
-<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-chev" viewBox="0 0 24 24"><path d="M8 10l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-right" viewBox="0 0 24 24"><path d="M10 8l4 4-4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
 <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="18" cy="12" r="1.8"/></symbol>
 <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 17v-6a6 6 0 0 1 12 0v6l1.5 2h-15zM10 21h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
-<symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9.5 9.5a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 3.5M12 17h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></symbol>
-<symbol id="i-board" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 4v16M15 4v16" stroke="currentColor" stroke-width="2"/></symbol>
-<symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M17.5 13.5a6.5 6.5 0 0 1 4 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 21a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.4l-5.7 3.1 1.2-6.4L2.8 9.7l6.4-.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
-<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-dash" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13" y="3" width="8" height="6" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13" y="11" width="8" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3" y="15" width="8" height="6" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
-<symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
-<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 19 10 12l4 4 6-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-<symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="12" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="19" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m8.2 10.8 7.6-4.6M8.2 13.2l7.6 4.6" stroke="currentColor" stroke-width="2"/></symbol>
-<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
-<symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-code" viewBox="0 0 24 24"><path d="m8 8-5 4 5 4M16 8l5 4-5 4M14 4l-4 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M8 10l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-right" viewBox="0 0 24 24"><path d="M10 8l4 4-4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-arrows" viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h8l5 5v13H6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 3v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-comp" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13" y="13" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17" cy="7" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="7" cy="17" r="4" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
-<symbol id="i-timeline" viewBox="0 0 24 24"><path d="M3 7h10M3 12h16M3 17h7" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol>
-<symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
-<symbol id="i-bug" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></symbol>
-<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
-<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-8 8M10 6H5v13h13v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v12m0 0-4-4m4 4 4-4M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </defs></svg>
 
 <header class="topbar">
-  <button class="icon-btn menu-btn" aria-label="Menu" data-guide="nav.menu" data-guide-delegable data-guide-desc="Menu button at the top left. On narrow screens the navigation sidebar is hidden and this button opens it"><svg><use href="#i-menu"/></svg></button>
-  <button class="icon-btn" aria-label="Switch app" data-guide="nav.appswitcher" data-guide-desc="App switcher (grid icon) at the far left of the top bar"><svg><use href="#i-grid"/></svg></button>
-  <a class="brand" href="#board" data-guide="nav.home" data-guide-delegable data-guide-desc="Meridian logo in the top bar. Goes back to the board" data-guide-goto="board"><span class="brand-mark"></span>Meridian</a>
-  <div class="global-search">
-    <svg><use href="#i-search"/></svg>
-    <input id="global-search" type="search" placeholder="Search" autocomplete="off" data-guide="nav.search" data-guide-desc="Global search box in the top bar. Searches issues, boards and projects across Meridian" data-guide-delegable>
-  </div>
-  <button class="btn primary" data-guide="nav.create" data-guide-desc="Create button in the top bar. Opens the create issue dialog"><svg><use href="#i-plus"/></svg>Create</button>
+  <a class="brand" href="#accounts" data-guide="nav.home" data-guide-delegable data-guide-goto="accounts" data-guide-desc="Northbank logo at the top left. Goes back to the Accounts overview"><span class="brand-mark"></span>Northbank</a>
+  <span class="spacer"></span>
   <button class="btn ghost" id="agent-activity-btn" data-guide="nav.agent" data-guide-desc="Agent activity button. Opens a panel that shows which tools the AI agent can see right now and every call it made"><span class="dot"></span>Agent activity</button>
-  <button class="icon-btn" aria-label="Notifications" data-guide="nav.notifications" data-guide-desc="Notifications bell in the top bar"><svg><use href="#i-bell"/></svg><span class="badge">9+</span></button>
-  <button class="icon-btn" aria-label="Help" data-guide="nav.help" data-guide-desc="Help (question mark) in the top bar"><svg><use href="#i-help"/></svg></button>
+  <button class="icon-btn" aria-label="Notifications" data-guide="nav.notifications" data-guide-desc="Notifications bell at the top right"><svg><use href="#i-bell"/></svg><span class="badge">2</span></button>
   <div class="menu-anchor">
-    <button class="icon-btn" aria-label="Settings" data-guide="nav.settings" data-opens="nav.settings" data-guide-desc="Global settings gear at the top right. Opens a menu with Personal settings and Meridian administration. This is NOT where project or board settings live"><svg><use href="#i-gear"/></svg></button>
-    <div class="menu right" data-menu="nav.settings" hidden>
-      <div class="menu-head">Meridian settings</div>
-      <button data-guide="nav.settings.personal" data-guide-menu="nav.settings" data-guide-desc="Personal settings, in the global settings menu">Personal settings</button>
-      <button data-guide="nav.settings.admin" data-guide-menu="nav.settings" data-guide-desc="Meridian administration, in the global settings menu. Site-wide admin, not project settings">Meridian administration</button>
-      <button data-guide="nav.settings.apps" data-guide-menu="nav.settings" data-guide-desc="Manage apps, in the global settings menu">Apps</button>
+    <button class="avatar-btn" data-guide="nav.profile" data-guide-label="Profile menu" data-guide-delegable data-opens="nav.profile" data-guide-desc="Profile menu (your initials at the top right). Contains Settings, Security and Sign out. Settings is where transfer limits, notifications and security live; there is no Settings tab in the main navigation"><span class="avatar">SH</span><svg><use href="#i-chev"/></svg></button>
+    <div class="menu right" data-menu="nav.profile" hidden>
+      <div class="menu-head">Sergio Huanca · Personal</div>
+      <button data-guide="nav.profile.settings" data-guide-delegable data-guide-menu="nav.profile" data-guide-goto="settings" data-guide-desc="Settings, in the profile menu. Opens Profile, Security, Transfer limits, Notifications and Documents">Settings</button>
+      <button data-guide="nav.profile.security" data-guide-delegable data-guide-menu="nav.profile" data-guide-goto="settings/security" data-guide-desc="Security, in the profile menu. Shortcut to the Security page of Settings">Security</button>
+      <button data-guide="nav.profile.signout" data-guide-menu="nav.profile" data-guide-desc="Sign out, in the profile menu">Sign out</button>
     </div>
   </div>
-  <span class="avatar">SH</span>
 </header>
-
-<div class="shell">
-<nav class="sidebar" data-region="navigation sidebar" data-region-opener="nav.menu">
-  <a class="side-item" href="#foryou" data-guide="sidebar.foryou" data-guide-goto="foryou" data-guide-delegable data-guide-desc="For you, first item of the sidebar"><svg><use href="#i-user"/></svg>For you</a>
-  <a class="side-item" href="#recent" data-guide="sidebar.recent" data-guide-goto="recent" data-guide-delegable data-guide-desc="Recent, in the sidebar"><svg><use href="#i-clock"/></svg>Recent<svg class="tail"><use href="#i-right"/></svg></a>
-  <a class="side-item" href="#starred" data-guide="sidebar.starred" data-guide-goto="starred" data-guide-delegable data-guide-desc="Starred, in the sidebar"><svg><use href="#i-star"/></svg>Starred<svg class="tail"><use href="#i-right"/></svg></a>
-  <a class="side-item" href="#apps" data-guide="sidebar.apps" data-guide-goto="apps" data-guide-delegable data-guide-desc="Apps, in the sidebar"><svg><use href="#i-grid"/></svg>Apps</a>
-  <div class="side-row">
-    <a class="side-item" href="#spaces" data-guide="sidebar.spaces" data-guide-goto="spaces" data-guide-delegable data-guide-desc="Spaces section header in the sidebar"><svg><use href="#i-board"/></svg>Spaces</a>
-    <button class="icon-btn sm" data-guide="sidebar.spaces.add" data-guide-desc="Create a space (plus) next to Spaces"><svg><use href="#i-plus"/></svg></button>
-    <button class="icon-btn sm" data-guide="sidebar.spaces.more" data-guide-desc="More actions next to Spaces"><svg><use href="#i-dots"/></svg></button>
-  </div>
-  <div class="side-sub">Recent</div>
-  <div class="side-project menu-anchor">
-    <span class="proj-icon"></span>
-    <a href="#board" class="proj-name" data-guide="sidebar.project.atlas" data-guide-delegable data-guide-goto="board" data-guide-desc="Atlas Platform project entry in the sidebar. Opens its board">Atlas Platform</a>
-    <button class="icon-btn sm" data-guide="sidebar.project.add" data-guide-desc="Create issue in Atlas Platform (plus icon next to the project name)"><svg><use href="#i-plus"/></svg></button>
-    <button class="icon-btn sm" data-guide="sidebar.project.more" data-guide-delegable data-opens="sidebar.project.more" data-guide-desc="More actions menu (three dots) next to the Atlas Platform project in the sidebar. Contains Project settings and Archive project"><svg><use href="#i-dots"/></svg></button>
-    <div class="menu" data-menu="sidebar.project.more" hidden>
-      <button data-guide="sidebar.project.settings" data-guide-delegable data-guide-menu="sidebar.project.more" data-guide-goto="project-settings" data-guide-desc="Project settings for Atlas Platform. Where details, access, notifications, automation, workflows and issue types are configured">Project settings</button>
-      <button data-guide="sidebar.project.star" data-guide-menu="sidebar.project.more" data-guide-desc="Add Atlas Platform to Starred">Add to starred</button>
-      <button class="danger" data-guide="sidebar.project.archive" data-guide-menu="sidebar.project.more" data-guide-danger data-guide-desc="Archive the Atlas Platform project. Hides it for everyone; only an admin can restore it">Archive project</button>
-    </div>
-  </div>
-  <div class="side-sub small">Recent</div>
-  <a class="side-item nested active" href="#board" data-guide="sidebar.board.kanban" data-guide-delegable data-guide-goto="board" data-guide-desc="ATL Kanban board link under the Atlas Platform project"><svg><use href="#i-board"/></svg>ATL Kanban board</a>
-  <a class="side-item nested" href="#atl-board" data-guide="sidebar.board.scrum" data-guide-goto="atl-board" data-guide-delegable data-guide-desc="ATL board, the second board of the project"><svg><use href="#i-board"/></svg>ATL board</a>
-  <div class="side-project"><span class="proj-icon orion"></span><a href="#orion" class="proj-name" data-guide="sidebar.project.orion" data-guide-goto="orion" data-guide-delegable data-guide-desc="Orion Mobile project in the sidebar">Orion Mobile</a></div>
-  <div class="side-project"><span class="proj-icon soc"></span><a href="#soc2" class="proj-name" data-guide="sidebar.project.soc2" data-guide-goto="soc2" data-guide-delegable data-guide-desc="SOC2 2026 project in the sidebar">SOC2 2026</a></div>
-  <a class="side-item" href="#spaces" data-guide="sidebar.morespaces" data-guide-goto="spaces" data-guide-delegable data-guide-desc="More spaces, in the sidebar"><svg><use href="#i-list"/></svg>More spaces<svg class="tail"><use href="#i-right"/></svg></a>
-  <div class="side-sub">Recommended</div>
-  <a class="side-item" href="#collect" data-guide="sidebar.collect" data-guide-goto="collect" data-guide-delegable data-guide-desc="Collect requests, a recommended app in the sidebar"><span class="proj-icon mini"></span>Collect requests<span class="chip try">Try</span></a>
-  <a class="side-item" href="#filters" data-guide="sidebar.filters" data-guide-goto="filters" data-guide-delegable data-guide-desc="Filters, in the sidebar"><svg><use href="#i-filter"/></svg>Filters</a>
-  <a class="side-item" href="#dashboards" data-guide="sidebar.dashboards" data-guide-goto="dashboards" data-guide-delegable data-guide-desc="Dashboards, in the sidebar"><svg><use href="#i-dash"/></svg>Dashboards</a>
-  <a class="side-item" href="#wiki" data-guide="sidebar.wiki" data-guide-goto="wiki" data-guide-delegable data-guide-desc="Wiki, external link in the sidebar"><span class="proj-icon wiki"></span>Wiki<svg class="tail"><use href="#i-ext"/></svg></a>
-  <a class="side-item" href="#teams" data-guide="sidebar.teams" data-guide-goto="teams" data-guide-delegable data-guide-desc="Teams, in the sidebar"><svg><use href="#i-people"/></svg>Teams<svg class="tail"><use href="#i-ext"/></svg></a>
-  <a class="side-item" href="#" data-guide="sidebar.customize" data-guide-desc="Customize sidebar, last item of the sidebar"><svg><use href="#i-sliders"/></svg>Customize sidebar</a>
+<nav class="tabs">
+  <a class="tab active" href="#accounts" data-guide="nav.tab.accounts" data-guide-delegable data-guide-goto="accounts" data-guide-desc="Accounts tab: balances, quick actions and recent transactions">Accounts</a>
+  <a class="tab" href="#transfers" data-guide="nav.tab.transfers" data-guide-delegable data-guide-goto="transfers" data-guide-desc="Transfers tab: between your accounts, to someone else, or international">Transfers</a>
+  <a class="tab" href="#cards" data-guide="nav.tab.cards" data-guide-delegable data-guide-goto="cards" data-guide-desc="Cards tab: your debit and credit cards, each with a menu to freeze, replace or change the PIN">Cards</a>
+  <a class="tab" href="#statements" data-guide="nav.tab.statements" data-guide-delegable data-guide-goto="statements" data-guide-desc="Statements tab: monthly statements to download">Statements</a>
+  <a class="tab" href="#help" data-guide="nav.tab.help" data-guide-delegable data-guide-goto="help" data-guide-desc="Help tab: frequently asked questions">Help</a>
 </nav>
 
 <main class="content">
 
-<section data-screen="board" data-screen-desc="The Kanban board of the Atlas Platform project (key ATL): columns with issue cards, board filters, the board tabs and the board's more-actions menu">
-  <div class="crumbs"><a href="#">Spaces</a><span>/</span><a href="#board">Atlas Platform</a></div>
-  <div class="title-row">
-    <h1>ATL Kanban board</h1>
-    <button class="icon-btn" data-guide="board.title.people" data-guide-desc="Board members (people icon) next to the board title"><svg><use href="#i-people"/></svg></button>
-    <div class="menu-anchor">
-      <button class="icon-btn" data-guide="board.title.more" data-opens="board.title.more" data-guide-desc="More actions (three dots) next to the board title. Contains Rename, Move and Star. Board configuration is not here"><svg><use href="#i-dots"/></svg></button>
-      <div class="menu" data-menu="board.title.more" hidden>
-        <button data-guide="board.title.rename" data-guide-menu="board.title.more" data-guide-desc="Rename board, in the title menu">Rename board</button>
-        <button data-guide="board.title.move" data-guide-menu="board.title.more" data-guide-desc="Move board to another project, in the title menu">Move board</button>
-        <button data-guide="board.title.star" data-guide-menu="board.title.more" data-guide-desc="Star this board, in the title menu">Add to starred</button>
-      </div>
-    </div>
-    <span class="spacer"></span>
-    <button class="icon-btn boxed" data-guide="board.share" data-guide-desc="Share board"><svg><use href="#i-share"/></svg></button>
-    <button class="icon-btn boxed" data-guide="board.automation" data-guide-delegable data-guide-desc="Automation shortcut (lightning icon) at the top right of the board. Opens the automation rules of this project" data-guide-goto="project-settings/automation"><svg><use href="#i-bolt"/></svg></button>
-    <button class="icon-btn boxed" data-guide="board.feedback" data-guide-desc="Give feedback"><svg><use href="#i-doc"/></svg></button>
-    <button class="icon-btn boxed" data-guide="board.fullscreen" data-guide-desc="Full screen"><svg><use href="#i-expand"/></svg></button>
+<section data-screen="accounts" data-screen-desc="Accounts overview: balances of the checking, savings and credit card accounts, quick actions and the latest transactions. Clicking a transaction opens its detail dialog">
+  <div class="page-head"><h1>Good evening, Sergio</h1><span class="muted">Tuesday 2 September</span></div>
+  <div class="accounts">
+    <div class="acct" data-guide="accounts.checking" data-guide-desc="Everyday Checking account tile (•••• 4821). Shows the available balance"><span class="acct-name">Everyday Checking</span><span class="acct-num">•••• 4821</span><b id="bal-checking"></b><span class="muted">Available</span></div>
+    <div class="acct" data-guide="accounts.savings" data-guide-desc="Savings account tile (•••• 7730)"><span class="acct-name">Savings</span><span class="acct-num">•••• 7730</span><b id="bal-savings"></b><span class="muted">2.1% APY</span></div>
+    <div class="acct credit" data-guide="accounts.credit" data-guide-desc="Credit card tile (•••• 1177). Shows the current balance and the available credit"><span class="acct-name">Credit card</span><span class="acct-num">•••• 1177</span><b id="bal-credit"></b><span class="muted" id="bal-credit-available"></span></div>
   </div>
-  <nav class="tabs">
-    <a class="tab" href="#summary" data-guide="board.tab.summary" data-guide-delegable data-guide-goto="summary" data-guide-desc="Summary tab of the project"><svg><use href="#i-chart"/></svg>Summary</a>
-    <a class="tab" href="#timeline" data-guide="board.tab.timeline" data-guide-delegable data-guide-goto="timeline" data-guide-desc="Timeline tab"><svg><use href="#i-timeline"/></svg>Timeline</a>
-    <a class="tab active" href="#board" data-guide="board.tab.board" data-guide-delegable data-guide-goto="board" data-guide-desc="Board tab, the Kanban view"><svg><use href="#i-board"/></svg>Board</a>
-    <a class="tab" href="#calendar" data-guide="board.tab.calendar" data-guide-delegable data-guide-goto="calendar" data-guide-desc="Calendar tab"><svg><use href="#i-cal"/></svg>Calendar</a>
-    <a class="tab" href="#reports" data-guide="board.tab.reports" data-guide-delegable data-guide-goto="reports" data-guide-desc="Reports tab"><svg><use href="#i-chart"/></svg>Reports</a>
-    <a class="tab" href="#list" data-guide="board.tab.list" data-guide-delegable data-guide-goto="list" data-guide-desc="List tab"><svg><use href="#i-list"/></svg>List</a>
-    <a class="tab" href="#forms" data-guide="board.tab.forms" data-guide-delegable data-guide-goto="forms" data-guide-desc="Forms tab"><svg><use href="#i-doc"/></svg>Forms</a>
-    <a class="tab" href="#components" data-guide="board.tab.components" data-guide-delegable data-guide-goto="components" data-guide-desc="Components tab"><svg><use href="#i-comp"/></svg>Components</a>
-    <a class="tab" href="#code" data-guide="board.tab.code" data-guide-delegable data-guide-goto="code" data-guide-desc="Code tab"><svg><use href="#i-code"/></svg>Code</a>
-    <div class="menu-anchor">
-      <a class="tab" href="#" data-guide="board.tab.more" data-guide-delegable data-opens="board.tab.more" data-guide-desc="More tabs menu (More 8). Contains Releases, Pages, Shortcuts and Project settings">More<span class="count">8</span></a>
-      <div class="menu" data-menu="board.tab.more" hidden>
-        <button data-guide="board.tab.releases" data-guide-menu="board.tab.more" data-guide-desc="Releases, in the More tabs menu">Releases</button>
-        <button data-guide="board.tab.pages" data-guide-menu="board.tab.more" data-guide-desc="Pages, in the More tabs menu">Pages</button>
-        <button data-guide="board.tab.shortcuts" data-guide-menu="board.tab.more" data-guide-desc="Shortcuts, in the More tabs menu">Shortcuts</button>
-        <button data-guide="board.tab.projectsettings" data-guide-delegable data-guide-menu="board.tab.more" data-guide-goto="project-settings" data-guide-desc="Project settings, at the bottom of the More tabs menu. Same destination as the sidebar project menu">Project settings</button>
-      </div>
-    </div>
-    <button class="icon-btn sm" data-guide="board.tab.add" data-guide-desc="Add a view (plus) at the end of the tabs"><svg><use href="#i-plus"/></svg></button>
-  </nav>
-  <div class="board-toolbar">
-    <div class="board-search"><svg><use href="#i-search"/></svg><input id="board-search" type="search" placeholder="Search board" autocomplete="off" data-guide="board.search" data-guide-desc="Search box that filters the cards on this board" data-guide-delegable></div>
-    <div class="avatars"><span class="avatar sm">SH</span><span class="avatar sm a2">AK</span><span class="avatar sm a3">AM</span><span class="avatar sm a4">BC</span><span class="avatar sm a5">DG</span><span class="avatar sm a6">GR</span><span class="avatar sm more">+4</span></div>
-    <button class="dd" data-guide="board.filter.version" data-guide-desc="Version filter dropdown on the board">Version<svg><use href="#i-chev"/></svg></button>
-    <button class="dd" data-guide="board.filter.feature" data-guide-desc="Feature filter dropdown on the board">Feature<svg><use href="#i-chev"/></svg></button>
-    <button class="dd" data-guide="board.filter.type" data-guide-desc="Type filter dropdown on the board">Type<svg><use href="#i-chev"/></svg></button>
-    <button class="dd" data-guide="board.filter.more" data-guide-desc="More filters dropdown on the board">More<svg><use href="#i-chev"/></svg></button>
-    <span class="spacer"></span>
-    <button class="btn subtle active" data-guide="board.group" data-guide-desc="Group by dropdown, currently Group: Query">Group: Query</button>
-    <button class="icon-btn boxed" data-guide="board.insights" data-guide-desc="Insights (chart icon) on the board toolbar"><svg><use href="#i-chart"/></svg></button>
-    <button class="icon-btn boxed" data-guide="board.viewsettings" data-guide-desc="View settings (sliders icon) on the board toolbar. Changes card fields and density only"><svg><use href="#i-sliders"/></svg></button>
-    <div class="menu-anchor">
-      <button class="icon-btn boxed" data-guide="board.more" data-guide-delegable data-opens="board.more" data-guide-desc="More actions menu (three dots) at the far right of the board toolbar. Contains Configure board, Manage workflow, Copy board and Delete board"><svg><use href="#i-dots"/></svg></button>
-      <div class="menu right" data-menu="board.more" hidden>
-        <button data-guide="board.more.configure" data-guide-delegable data-guide-menu="board.more" data-guide-goto="board-settings" data-guide-desc="Configure board, in the board toolbar menu. Opens Board settings: columns, swimlanes, quick filters, card layout, working days">Configure board</button>
-        <button data-guide="board.more.workflow" data-guide-delegable data-guide-menu="board.more" data-guide-goto="project-settings/workflows" data-guide-desc="Manage workflow, in the board toolbar menu. Opens the workflow editor in project settings">Manage workflow</button>
-        <button data-guide="board.more.copy" data-guide-menu="board.more" data-guide-desc="Copy board, in the board toolbar menu">Copy board</button>
-        <button class="danger" data-guide="board.more.delete" data-guide-menu="board.more" data-guide-danger data-guide-desc="Delete board. Removes this board for everyone">Delete board</button>
-      </div>
-    </div>
+  <div class="quick">
+    <a class="btn primary" href="#transfers" data-guide="accounts.transfer" data-guide-delegable data-guide-goto="transfers" data-guide-desc="Transfer quick action on the Accounts overview. Opens the Transfers page"><svg><use href="#i-arrows"/></svg>Transfer</a>
+    <button class="btn" data-guide="accounts.pay" data-guide-desc="Pay a bill quick action">Pay a bill</button>
+    <button class="btn" data-guide="accounts.deposit" data-guide-desc="Deposit a check quick action">Deposit a check</button>
   </div>
-  <div class="swimlane-head"><svg><use href="#i-chev"/></svg>Everything else <span>(688 issues)</span></div>
-  <div class="board" id="board"></div>
+  <div class="tx-head">
+    <h2>Recent transactions</h2>
+    <div class="search"><svg><use href="#i-search"/></svg><input id="tx-search" type="search" placeholder="Search transactions" autocomplete="off" data-guide="accounts.search" data-guide-delegable data-guide-desc="Search box that filters the recent transactions by merchant"></div>
+  </div>
+  <div class="tx-list" id="tx-list"></div>
 </section>
 
-<section data-screen="board-settings" data-screen-desc="Board settings of ATL Kanban board. Left navigation: General, Columns, Swimlanes, Quick filters, Card colors, Card layout, Estimation, Working days" hidden>
-  <div class="crumbs"><a href="#">Spaces</a><span>/</span><a href="#board">Atlas Platform</a><span>/</span><a href="#board" data-guide="boardsettings.back" data-guide-delegable data-guide-goto="board" data-guide-desc="ATL Kanban board link in the breadcrumb. Goes back to the board">ATL Kanban board</a><span>/</span><span>Board settings</span></div>
-  <h1>Board settings</h1>
+<section data-screen="transfers" data-screen-desc="Transfers. Left navigation: Between my accounts, To someone, International. International transfers are turned off until the person turns them on in Settings › Transfer limits › Advanced" hidden>
+  <h1>Transfers</h1>
   <div class="settings-layout">
     <nav class="settings-nav">
-      <button class="snav" data-panel-target="general" data-guide="boardsettings.tab.general" data-guide-delegable data-guide-desc="General tab of board settings: board name, administrators, saved filter">General</button>
-      <button class="snav" data-panel-target="columns" data-guide="boardsettings.tab.columns" data-guide-delegable data-guide-desc="Columns tab of board settings: add, rename or remove columns, map statuses, set WIP limits (Min/Max)">Columns</button>
-      <button class="snav" data-panel-target="swimlanes" data-guide="boardsettings.tab.swimlanes" data-guide-delegable data-guide-desc="Swimlanes tab of board settings">Swimlanes</button>
-      <button class="snav" data-panel-target="quickfilters" data-guide="boardsettings.tab.quickfilters" data-guide-delegable data-guide-desc="Quick filters tab of board settings">Quick filters</button>
-      <button class="snav" data-panel-target="cardcolors" data-guide="boardsettings.tab.cardcolors" data-guide-delegable data-guide-desc="Card colors tab of board settings">Card colors</button>
-      <button class="snav" data-panel-target="cardlayout" data-guide="boardsettings.tab.cardlayout" data-guide-delegable data-guide-desc="Card layout tab of board settings: which fields show on cards">Card layout</button>
-      <button class="snav" data-panel-target="estimation" data-guide="boardsettings.tab.estimation" data-guide-delegable data-guide-desc="Estimation tab of board settings">Estimation</button>
-      <button class="snav" data-panel-target="workingdays" data-guide="boardsettings.tab.workingdays" data-guide-delegable data-guide-desc="Working days tab of board settings">Working days</button>
+      <button class="snav" data-panel-target="between" data-guide="transfers.tab.between" data-guide-delegable data-guide-desc="Between my accounts panel of Transfers">Between my accounts</button>
+      <button class="snav" data-panel-target="someone" data-guide="transfers.tab.someone" data-guide-delegable data-guide-desc="To someone panel of Transfers: send money to a saved payee">To someone</button>
+      <button class="snav" data-panel-target="international" data-guide="transfers.tab.international" data-guide-delegable data-guide-desc="International panel of Transfers. Shows a notice while international transfers are turned off">International</button>
     </nav>
     <div class="settings-body">
-      <div data-panel="general" data-panel-desc="General board settings">
-        <h2>General</h2>
-        <label class="field">Board name<input value="ATL Kanban board" data-guide="boardsettings.general.name" data-guide-desc="Board name text field in General board settings"></label>
-        <label class="field">Administrators<input value="Sergio H., Ana K." data-guide="boardsettings.general.admins" data-guide-desc="Board administrators field"></label>
-        <label class="field">Saved filter<input value="ATL board filter" readonly data-guide="boardsettings.general.filter" data-guide-desc="Saved filter that feeds this board (read only)"></label>
-        <p class="muted">Changes on this page are saved automatically.</p>
-      </div>
-      <div data-panel="columns" data-panel-desc="Columns and statuses: add, rename or remove columns and set WIP limits with the Min and Max fields. Changes save automatically" hidden>
-        <h2>Columns</h2>
-        <p class="muted">Drag statuses between columns. Set a Min or Max to highlight the column when the limit is broken. Changes are saved as you make them.</p>
-        <div class="columns-config" id="columns-config"></div>
-        <div class="add-column-wrap">
-          <button class="btn" data-guide="boardsettings.columns.add" data-guide-desc="Add column button below the columns list on the Columns settings page. Reveals a small form to name the new column"><svg><use href="#i-plus"/></svg>Add column</button>
-          <form id="add-column-form" class="inline-form" hidden>
-            <input id="new-column-name" placeholder="Column name" autocomplete="off" data-guide="boardsettings.columns.name" data-guide-desc="Text field for the new column's name. Appears after pressing Add column">
-            <button type="submit" class="btn primary" data-guide="boardsettings.columns.create" data-guide-desc="Add button that creates the column with the typed name. Board configuration is changed by the person, so this step is never delegated to an agent">Add</button>
-            <button type="button" class="btn subtle" data-guide="boardsettings.columns.cancel" data-guide-desc="Cancel adding a column">Cancel</button>
-          </form>
+      <form data-panel="between" data-panel-desc="Move money between your own Northbank accounts. Transfers are immediate" id="between-form">
+        <h2>Between my accounts</h2>
+        <label class="field">From<select data-guide="transfers.from" data-guide-desc="From account dropdown of the transfer form"><option value="checking">Everyday Checking •••• 4821</option><option value="savings">Savings •••• 7730</option></select></label>
+        <label class="field">To<select data-guide="transfers.to" data-guide-desc="To account dropdown of the transfer form"><option value="savings">Savings •••• 7730</option><option value="checking">Everyday Checking •••• 4821</option></select></label>
+        <label class="field">Amount<input inputmode="decimal" placeholder="0.00" autocomplete="off" data-guide="transfers.amount" data-guide-desc="Amount field of the transfer form, in dollars"></label>
+        <button type="submit" class="btn primary" data-guide="transfers.send" data-guide-danger data-guide-desc="Transfer button. Moves the money immediately and cannot be undone">Transfer</button>
+      </form>
+      <form data-panel="someone" data-panel-desc="Send money to a saved payee" id="someone-form" hidden>
+        <h2>To someone</h2>
+        <label class="field">Payee<select data-guide="transfers.payee" data-guide-desc="Payee dropdown: saved people and businesses"><option>Ana Kowalski</option><option>Ferro Properties (rent)</option><option>Diego García</option></select></label>
+        <label class="field">Amount<input inputmode="decimal" placeholder="0.00" autocomplete="off" data-guide="transfers.someone.amount" data-guide-desc="Amount field for the payment to a payee"></label>
+        <button type="submit" class="btn primary" data-guide="transfers.someone.send" data-guide-danger data-guide-desc="Send button. Sends the money to the payee immediately and cannot be undone">Send</button>
+      </form>
+      <div data-panel="international" data-panel-desc="International transfers. Off by default; the notice links to the setting that turns them on" hidden>
+        <h2>International</h2>
+        <div class="notice" id="intl-off">
+          <b>International transfers are turned off for this profile.</b>
+          <span>Turn them on under Settings › Transfer limits › Advanced. You confirm with a code sent to your phone.</span>
+          <a class="btn" href="#settings/limits" data-guide="transfers.international.enable" data-guide-delegable data-guide-goto="settings/limits" data-guide-desc="Go to Transfer limits link inside the International notice. Shortcut to Settings › Transfer limits, where the International transfers toggle lives inside the collapsed Advanced section">Go to Transfer limits</a>
         </div>
-      </div>
-      <div data-panel="swimlanes" data-panel-desc="Swimlane configuration" hidden><h2>Swimlanes</h2><p class="muted">Base swimlanes on</p><label class="field"><select data-guide="boardsettings.swimlanes.base" data-guide-desc="Base swimlanes on dropdown"><option>Queries</option><option>Assignees</option><option>Epics</option><option>No swimlanes</option></select></label></div>
-      <div data-panel="quickfilters" data-panel-desc="Quick filters" hidden><h2>Quick filters</h2><table class="tbl"><tr><th>Name</th><th>Query</th></tr><tr><td>Only my issues</td><td><code>assignee = currentUser()</code></td></tr><tr><td>Recently updated</td><td><code>updated >= -1d</code></td></tr></table></div>
-      <div data-panel="cardcolors" data-panel-desc="Card colors" hidden><h2>Card colors</h2><p class="muted">Colors based on <b>Priorities</b>.</p></div>
-      <div data-panel="cardlayout" data-panel-desc="Card layout" hidden><h2>Card layout</h2><p class="muted">Fields shown on cards: Epic, Priority, Assignee, Due date.</p></div>
-      <div data-panel="estimation" data-panel-desc="Estimation" hidden><h2>Estimation</h2><p class="muted">Estimation statistic: <b>Story points</b>.</p></div>
-      <div data-panel="workingdays" data-panel-desc="Working days" hidden><h2>Working days</h2><p class="muted">Monday to Friday, timezone America/La_Paz.</p></div>
-    </div>
-  </div>
-</section>
-
-<section data-screen="project-settings" data-screen-desc="Project settings of Atlas Platform. Left navigation: Details, Access, Notifications, Automation, Workflows, Issue types, Features" hidden>
-  <div class="crumbs"><a href="#">Spaces</a><span>/</span><a href="#board">Atlas Platform</a><span>/</span><span>Project settings</span></div>
-  <h1>Project settings</h1>
-  <div class="settings-layout">
-    <nav class="settings-nav">
-      <button class="snav" data-panel-target="details" data-guide="projectsettings.tab.details" data-guide-delegable data-guide-desc="Details tab of project settings: name, key, lead, description">Details</button>
-      <button class="snav" data-panel-target="access" data-guide="projectsettings.tab.access" data-guide-delegable data-guide-desc="Access tab of project settings: who can see and edit the project, roles">Access</button>
-      <button class="snav" data-panel-target="notifications" data-guide="projectsettings.tab.notifications" data-guide-delegable data-guide-desc="Notifications tab of project settings: who gets an email for each event (issue created, assigned, resolved, commented)">Notifications</button>
-      <button class="snav" data-panel-target="automation" data-guide="projectsettings.tab.automation" data-guide-delegable data-guide-desc="Automation tab of project settings: rules that run when things happen">Automation</button>
-      <button class="snav" data-panel-target="workflows" data-guide="projectsettings.tab.workflows" data-guide-delegable data-guide-desc="Workflows tab of project settings">Workflows</button>
-      <button class="snav" data-panel-target="issuetypes" data-guide="projectsettings.tab.issuetypes" data-guide-delegable data-guide-desc="Issue types tab of project settings">Issue types</button>
-      <button class="snav" data-panel-target="features" data-guide="projectsettings.tab.features" data-guide-delegable data-guide-desc="Features tab of project settings">Features</button>
-    </nav>
-    <div class="settings-body">
-      <div data-panel="details" data-panel-desc="Project details" hidden>
-        <h2>Details</h2>
-        <label class="field">Name<input value="Atlas Platform" data-guide="projectsettings.details.name" data-guide-desc="Project name field"></label>
-        <label class="field">Key<input value="ATL" readonly data-guide="projectsettings.details.key" data-guide-desc="Project key (read only)"></label>
-        <label class="field">Project lead<input value="Sergio H." data-guide="projectsettings.details.lead" data-guide-desc="Project lead field"></label>
-        <label class="field">Default assignee<select data-guide="projectsettings.details.assignee" data-guide-desc="Default assignee dropdown"><option>Unassigned</option><option>Project lead</option></select></label>
-      </div>
-      <div data-panel="access" data-panel-desc="Access and roles" hidden>
-        <h2>Access</h2>
-        <table class="tbl"><tr><th>Name</th><th>Role</th></tr><tr><td>Sergio H.</td><td>Administrator</td></tr><tr><td>Ana K.</td><td>Administrator</td></tr><tr><td>Everyone else</td><td>Member</td></tr></table>
-        <button class="btn" data-guide="projectsettings.access.add" data-guide-desc="Add people to the project">Add people</button>
-      </div>
-      <div data-panel="notifications" data-panel-desc="Notification scheme: for each event, who receives an email. Use Edit on a row to change recipients" hidden>
-        <h2>Notifications</h2>
-        <p class="muted">Scheme: <b>Atlas default notifications</b>. Emails are sent to the recipients listed for each event.</p>
-        <table class="tbl" id="notif-table"></table>
-      </div>
-      <div data-panel="automation" data-panel-desc="Automation rules of this project" hidden>
-        <h2>Automation</h2>
-        <div id="rules"></div>
-        <button class="btn primary" data-guide="projectsettings.automation.create" data-guide-desc="Create rule button on the Automation page. Opens the rule builder"><svg><use href="#i-plus"/></svg>Create rule</button>
-        <form id="rule-form" class="rule-builder" hidden>
-          <label class="field">When<select data-guide="automation.trigger" data-guide-desc="Trigger dropdown of the rule builder (When)"><option value="">Choose a trigger</option><option>Issue assigned</option><option>Issue created</option><option>Issue transitioned</option><option>Comment added</option></select></label>
-          <label class="field">Then<select data-guide="automation.action" data-guide-desc="Action dropdown of the rule builder (Then)"><option value="">Choose an action</option><option>Add a comment</option><option>Transition the issue</option><option>Assign to project lead</option><option>Send a message to Slack</option></select></label>
-          <div class="row">
-            <button type="submit" class="btn primary" data-guide="automation.enable" data-guide-desc="Turn on rule button. Saves and enables the rule for the whole project, so the person confirms it themselves">Turn on rule</button>
-            <button type="button" class="btn subtle" data-guide="automation.cancel" data-guide-desc="Cancel rule creation">Cancel</button>
-          </div>
+        <form id="intl-form" hidden>
+          <label class="field">Recipient country<select data-guide="transfers.international.country" data-guide-desc="Recipient country dropdown of the international transfer form"><option>Peru</option><option>Spain</option><option>Germany</option><option>Mexico</option><option>Japan</option></select></label>
+          <label class="field">IBAN or account number<input autocomplete="off" placeholder="ES91 2100 0418 4502 0005 1332" data-guide="transfers.international.iban" data-guide-desc="Recipient IBAN or account number field"></label>
+          <label class="field">Amount<input inputmode="decimal" placeholder="0.00" autocomplete="off" data-guide="transfers.international.amount" data-guide-desc="Amount field of the international transfer form, in dollars"></label>
+          <button type="submit" class="btn primary" data-guide="transfers.international.send" data-guide-danger data-guide-desc="Send button of the international transfer form. Sends the money abroad and cannot be undone">Send</button>
         </form>
       </div>
-      <div data-panel="workflows" data-panel-desc="Workflows" hidden><h2>Workflows</h2><table class="tbl"><tr><th>Workflow</th><th>Issue types</th></tr><tr><td>ATL software workflow</td><td>Task, Story, Bug</td></tr><tr><td>ATL epic workflow</td><td>Epic</td></tr></table><button class="btn" data-guide="projectsettings.workflows.edit" data-guide-desc="Edit the ATL software workflow">Edit workflow</button></div>
-      <div data-panel="issuetypes" data-panel-desc="Issue types" hidden><h2>Issue types</h2><table class="tbl"><tr><th>Type</th><th>Description</th></tr><tr><td>Task</td><td>A small piece of work</td></tr><tr><td>Story</td><td>A user-facing feature</td></tr><tr><td>Bug</td><td>A problem that impairs functionality</td></tr><tr><td>Epic</td><td>A large body of work</td></tr></table></div>
-      <div data-panel="features" data-panel-desc="Project features" hidden><h2>Features</h2><label class="toggle"><input type="checkbox" checked data-guide="projectsettings.features.backlog" data-guide-desc="Backlog feature toggle">Backlog</label><label class="toggle"><input type="checkbox" checked data-guide="projectsettings.features.timeline" data-guide-desc="Timeline feature toggle">Timeline</label><label class="toggle"><input type="checkbox" data-guide="projectsettings.features.sprints" data-guide-desc="Sprints feature toggle">Sprints</label></div>
     </div>
   </div>
 </section>
 
-<section data-screen="summary" data-screen-desc="Project summary with a few stats" hidden><div class="crumbs"><a href="#">Spaces</a><span>/</span><a href="#board">Atlas Platform</a></div><h1>Summary</h1><div class="stats"><div class="stat"><b>24</b>done last 7 days</div><div class="stat"><b>31</b>updated last 7 days</div><div class="stat"><b>12</b>created last 7 days</div><div class="stat"><b>3</b>due soon</div></div><p class="muted">Board activity, priorities and workload live here.</p><a class="btn subtle" href="#board" data-guide="summary.back" data-guide-goto="board" data-guide-desc="Back to board">Back to board</a></section>
-<section data-screen="timeline" data-screen-desc="Timeline view" hidden><div class="crumbs"><a href="#">Spaces</a><span>/</span><a href="#board">Atlas Platform</a></div><h1>Timeline</h1><p class="muted">Epics laid out over the next two quarters.</p><a class="btn subtle" href="#board" data-guide="timeline.back" data-guide-goto="board" data-guide-desc="Back to board">Back to board</a></section>
-<section data-screen="calendar" data-screen-desc="Calendar view" hidden><div class="crumbs"><a href="#">Spaces</a><span>/</span><a href="#board">Atlas Platform</a></div><h1>Calendar</h1><p class="muted">Issues by due date.</p><a class="btn subtle" href="#board" data-guide="calendar.back" data-guide-goto="board" data-guide-desc="Back to board">Back to board</a></section>
-<section data-screen="reports" data-screen-desc="Reports view" hidden><div class="crumbs"><a href="#">Spaces</a><span>/</span><a href="#board">Atlas Platform</a></div><h1>Reports</h1><p class="muted">Cumulative flow, cycle time, velocity.</p><a class="btn subtle" href="#board" data-guide="reports.back" data-guide-goto="board" data-guide-desc="Back to board">Back to board</a></section>
-<section data-screen="list" data-screen-desc="List view of issues" hidden><div class="crumbs"><a href="#">Spaces</a><span>/</span><a href="#board">Atlas Platform</a></div><h1>List</h1><p class="muted">All 688 issues in a table.</p><a class="btn subtle" href="#board" data-guide="list.back" data-guide-goto="board" data-guide-desc="Back to board">Back to board</a></section>
-<section data-screen="forms" data-screen-desc="Forms view" hidden><div class="crumbs"><a href="#">Spaces</a><span>/</span><a href="#board">Atlas Platform</a></div><h1>Forms</h1><p class="muted">Intake forms for this project.</p><a class="btn subtle" href="#board" data-guide="forms.back" data-guide-goto="board" data-guide-desc="Back to board">Back to board</a></section>
-<section data-screen="components" data-screen-desc="Components view" hidden><div class="crumbs"><a href="#">Spaces</a><span>/</span><a href="#board">Atlas Platform</a></div><h1>Components</h1><p class="muted">API, Web, Mobile, Data.</p><a class="btn subtle" href="#board" data-guide="components.back" data-guide-goto="board" data-guide-desc="Back to board">Back to board</a></section>
-<section data-screen="code" data-screen-desc="Code view" hidden><div class="crumbs"><a href="#">Spaces</a><span>/</span><a href="#board">Atlas Platform</a></div><h1>Code</h1><p class="muted">Linked repositories and pull requests.</p><a class="btn subtle" href="#board" data-guide="code.back" data-guide-goto="board" data-guide-desc="Back to board">Back to board</a></section>
+<section data-screen="cards" data-screen-desc="Cards: the debit and credit cards. Each card has a three-dots menu with Freeze card, Change PIN, Replace card and Travel notice. Card controls for the debit card are below" hidden>
+  <h1>Cards</h1>
+  <div class="cards">
+    <div class="bankcard debit" id="card-debit">
+      <div class="bankcard-top"><span>Debit card</span><span class="chip frozen" id="frozen-debit" hidden>Frozen</span>
+        <div class="menu-anchor">
+          <button class="icon-btn light" data-guide="cards.debit.more" data-guide-label="Debit card menu" data-guide-delegable data-opens="cards.debit.more" data-guide-desc="More actions (three dots) on the debit card. Contains Freeze card, Change PIN, Replace card and Travel notice"><svg><use href="#i-dots"/></svg></button>
+          <div class="menu right" data-menu="cards.debit.more" hidden>
+            <button data-guide="cards.debit.freeze" data-guide-menu="cards.debit.more" id="freeze-debit" data-guide-desc="Freeze or unfreeze the debit card, in the card menu. A frozen card declines every purchase until it is unfrozen. The person decides this">Freeze card</button>
+            <button data-guide="cards.debit.pin" data-guide-menu="cards.debit.more" data-guide-desc="Change the PIN of the debit card, in the card menu">Change PIN</button>
+            <button data-guide="cards.debit.replace" data-guide-menu="cards.debit.more" data-guide-desc="Order a replacement debit card, in the card menu">Replace card</button>
+            <button data-guide="cards.debit.travel" data-guide-menu="cards.debit.more" data-guide-desc="Add a travel notice for the debit card, in the card menu">Travel notice</button>
+          </div>
+        </div>
+      </div>
+      <div class="bankcard-num">•••• •••• •••• 4821</div>
+      <div class="bankcard-foot"><span>SERGIO HUANCA</span><span>09/29</span></div>
+    </div>
+    <div class="bankcard credit" id="card-credit">
+      <div class="bankcard-top"><span>Credit card</span><span class="chip frozen" id="frozen-credit" hidden>Frozen</span>
+        <div class="menu-anchor">
+          <button class="icon-btn light" data-guide="cards.credit.more" data-guide-label="Credit card menu" data-guide-delegable data-opens="cards.credit.more" data-guide-desc="More actions (three dots) on the credit card. Contains Freeze card, Change PIN, Replace card and Travel notice"><svg><use href="#i-dots"/></svg></button>
+          <div class="menu right" data-menu="cards.credit.more" hidden>
+            <button data-guide="cards.credit.freeze" data-guide-menu="cards.credit.more" id="freeze-credit" data-guide-desc="Freeze or unfreeze the credit card, in the card menu. The person decides this">Freeze card</button>
+            <button data-guide="cards.credit.pin" data-guide-menu="cards.credit.more" data-guide-desc="Change the PIN of the credit card, in the card menu">Change PIN</button>
+            <button data-guide="cards.credit.replace" data-guide-menu="cards.credit.more" data-guide-desc="Order a replacement credit card, in the card menu">Replace card</button>
+            <button data-guide="cards.credit.travel" data-guide-menu="cards.credit.more" data-guide-desc="Add a travel notice for the credit card, in the card menu">Travel notice</button>
+          </div>
+        </div>
+      </div>
+      <div class="bankcard-num">•••• •••• •••• 1177</div>
+      <div class="bankcard-foot"><span>SERGIO HUANCA</span><span>03/28</span></div>
+    </div>
+  </div>
+  <h2>Card controls · Debit card</h2>
+  <div class="panel">
+    <label class="toggle"><input type="checkbox" checked data-guide="cards.controls.online" data-guide-desc="Online purchases toggle for the debit card">Online purchases</label>
+    <label class="toggle"><input type="checkbox" checked data-guide="cards.controls.contactless" data-guide-desc="Contactless payments toggle for the debit card">Contactless payments</label>
+    <label class="toggle"><input type="checkbox" data-guide="cards.controls.abroad" data-guide-desc="Purchases abroad toggle for the debit card. Off by default">Purchases abroad</label>
+  </div>
+</section>
 
-<section data-screen="foryou" data-screen-desc="For you: the issues assigned to you. Clicking one opens the issue panel" hidden><h1>For you</h1><h2>Assigned to me</h2><div class="issue-list" id="foryou-list"></div><h2>Recently viewed</h2><ul class="plain"><li>ATL Kanban board</li><li>ATL-136 Variance overview report page</li><li>SOC2 2026</li></ul></section>
-<section data-screen="recent" data-screen-desc="Recently viewed boards, projects and issues" hidden><h1>Recent</h1><ul class="plain"><li>ATL Kanban board · 2 minutes ago</li><li>Board settings · 10 minutes ago</li><li>ATL-224 Alerts view (partner pilot) · yesterday</li><li>Orion Mobile · yesterday</li></ul></section>
-<section data-screen="starred" data-screen-desc="Starred items" hidden><h1>Starred</h1><p class="muted">Boards, filters and dashboards you star show up here. Nothing yet.</p></section>
-<section data-screen="apps" data-screen-desc="Installed apps" hidden><h1>Apps</h1><div class="app-grid"><div class="app-tile">Timesheets</div><div class="app-tile">Test manager</div><div class="app-tile">Roadmaps</div><div class="app-tile">Collect requests</div><div class="app-tile">Slack</div><div class="app-tile">GitHub</div></div></section>
-<section data-screen="spaces" data-screen-desc="Directory of all spaces (projects)" hidden><h1>Spaces</h1><table class="tbl"><tr><th>Name</th><th>Key</th><th>Lead</th></tr><tr><td><a href="#board">Atlas Platform</a></td><td>ATL</td><td>Sergio H.</td></tr><tr><td><a href="#orion">Orion Mobile</a></td><td>ORI</td><td>Ana K.</td></tr><tr><td><a href="#soc2">SOC2 2026</a></td><td>SOC</td><td>Gabriel R.</td></tr></table><button class="btn primary" data-guide="spaces.create" data-guide-desc="Create a new space"><svg><use href="#i-plus"/></svg>Create space</button></section>
-<section data-screen="orion" data-screen-desc="Orion Mobile project home" hidden><div class="crumbs"><a href="#spaces">Spaces</a><span>/</span><span>Orion Mobile</span></div><h1>Orion Mobile</h1><p class="muted">iOS and Android apps. 212 open issues, sprint 18 in progress.</p><div class="stats"><div class="stat"><b>18</b>done last 7 days</div><div class="stat"><b>7</b>bugs open</div><div class="stat"><b>2</b>releases this month</div></div><h2>Boards</h2><ul class="plain"><li>ORI Sprint board</li><li>ORI Bugs</li></ul></section>
-<section data-screen="soc2" data-screen-desc="SOC2 2026 project home" hidden><div class="crumbs"><a href="#spaces">Spaces</a><span>/</span><span>SOC2 2026</span></div><h1>SOC2 2026</h1><p class="muted">Audit evidence and controls. 64 open issues.</p><div class="stats"><div class="stat"><b>41</b>controls done</div><div class="stat"><b>23</b>controls open</div><div class="stat"><b>Oct 12</b>audit date</div></div><h2>Boards</h2><ul class="plain"><li>SOC controls board</li></ul></section>
-<section data-screen="atl-board" data-screen-desc="ATL board, the Scrum board of Atlas Platform" hidden><div class="crumbs"><a href="#spaces">Spaces</a><span>/</span><a href="#board">Atlas Platform</a></div><h1>ATL board</h1><p class="muted">Scrum board of the same project. Sprint 42, 9 days left, 31 issues.</p><a class="btn subtle" href="#board" data-guide="atlboard.kanban" data-guide-goto="board" data-guide-delegable data-guide-desc="Link back to the ATL Kanban board">Open the Kanban board</a></section>
-<section data-screen="collect" data-screen-desc="Collect requests, a recommended app" hidden><h1>Collect requests</h1><p class="muted">Turn a public form into issues in Atlas Platform.</p><button class="btn primary" data-guide="collect.try" data-guide-desc="Try Collect requests for free">Try it free</button></section>
-<section data-screen="filters" data-screen-desc="Saved filters" hidden><h1>Filters</h1><table class="tbl"><tr><th>Name</th><th>Query</th></tr><tr><td>My open issues</td><td><code>assignee = currentUser() AND resolution = Unresolved</code></td></tr><tr><td>Reported by me</td><td><code>reporter = currentUser()</code></td></tr><tr><td>Due this week</td><td><code>due &lt;= endOfWeek()</code></td></tr></table><button class="btn" data-guide="filters.create" data-guide-desc="Create a new saved filter"><svg><use href="#i-plus"/></svg>Create filter</button></section>
-<section data-screen="dashboards" data-screen-desc="Dashboards" hidden><h1>Dashboards</h1><ul class="plain"><li>Atlas delivery</li><li>Bugs by component</li><li>SOC2 evidence progress</li></ul></section>
-<section data-screen="wiki" data-screen-desc="Wiki pages linked to the projects" hidden><h1>Wiki</h1><ul class="plain"><li>Atlas architecture</li><li>Runbooks</li><li>Release notes</li></ul></section>
-<section data-screen="teams" data-screen-desc="Teams directory" hidden><h1>Teams</h1><table class="tbl"><tr><th>Team</th><th>Members</th></tr><tr><td>Platform</td><td>Sergio H., Ana K., Diego G.</td></tr><tr><td>Data</td><td>Ana M., Gabriel R.</td></tr><tr><td>Mobile</td><td>Bruno C., Sofía B.</td></tr></table></section>
+<section data-screen="statements" data-screen-desc="Monthly statements to download" hidden>
+  <h1>Statements</h1>
+  <div class="panel">
+    <table class="tbl"><tr><th>Month</th><th>Account</th><th></th></tr>
+      <tr><td>August 2026</td><td>Everyday Checking</td><td><button class="btn subtle" data-guide="statements.download.aug" data-guide-delegable data-guide-desc="Download the August 2026 statement (PDF)"><svg><use href="#i-down"/></svg>PDF</button></td></tr>
+      <tr><td>July 2026</td><td>Everyday Checking</td><td><button class="btn subtle" data-guide="statements.download.jul" data-guide-delegable data-guide-desc="Download the July 2026 statement (PDF)"><svg><use href="#i-down"/></svg>PDF</button></td></tr>
+      <tr><td>June 2026</td><td>Everyday Checking</td><td><button class="btn subtle" data-guide="statements.download.jun" data-guide-delegable data-guide-desc="Download the June 2026 statement (PDF)"><svg><use href="#i-down"/></svg>PDF</button></td></tr>
+    </table>
+  </div>
+</section>
+
+<section data-screen="help" data-screen-desc="Help: frequently asked questions" hidden>
+  <h1>Help</h1>
+  <ul class="plain">
+    <li><b>How do I freeze my card?</b><span class="muted">Cards › the three dots on the card › Freeze card.</span></li>
+    <li><b>How do I dispute a charge?</b><span class="muted">Accounts › open the transaction › the three dots › Dispute this charge.</span></li>
+    <li><b>How do I send money abroad?</b><span class="muted">Turn on international transfers first: profile menu › Settings › Transfer limits › Advanced.</span></li>
+  </ul>
+</section>
+
+<section data-screen="settings" data-screen-desc="Settings, reached from the profile menu at the top right. Left navigation: Profile, Security, Transfer limits, Notifications, Documents" hidden>
+  <h1>Settings</h1>
+  <div class="settings-layout">
+    <nav class="settings-nav">
+      <button class="snav" data-panel-target="profile" data-guide="settings.tab.profile" data-guide-delegable data-guide-desc="Profile page of Settings: name, email, phone">Profile</button>
+      <button class="snav" data-panel-target="security" data-guide="settings.tab.security" data-guide-delegable data-guide-desc="Security page of Settings: two-step verification, sign-in alerts, password, trusted devices">Security</button>
+      <button class="snav" data-panel-target="limits" data-guide="settings.tab.limits" data-guide-delegable data-guide-desc="Transfer limits page of Settings: daily and per-transaction limits, and an Advanced section with International transfers and same-day transfers to new payees">Transfer limits</button>
+      <button class="snav" data-panel-target="notifications" data-guide="settings.tab.notifications" data-guide-delegable data-guide-desc="Notifications page of Settings: which alerts you get">Notifications</button>
+      <button class="snav" data-panel-target="documents" data-guide="settings.tab.documents" data-guide-delegable data-guide-desc="Documents page of Settings: tax forms and agreements">Documents</button>
+    </nav>
+    <div class="settings-body">
+      <div data-panel="profile" data-panel-desc="Name, email and phone on file">
+        <h2>Profile</h2>
+        <label class="field">Full name<input value="Sergio Huanca" data-guide="settings.profile.name" data-guide-desc="Full name field"></label>
+        <label class="field">Email<input value="sergio@example.com" data-guide="settings.profile.email" data-guide-desc="Email field"></label>
+        <label class="field">Phone<input value="+1 (415) 555-8821" data-guide="settings.profile.phone" data-guide-desc="Phone number field. Confirmation codes are sent here"></label>
+      </div>
+      <div data-panel="security" data-panel-desc="Two-step verification, sign-in alerts, password and trusted devices" hidden>
+        <h2>Security</h2>
+        <label class="toggle"><input type="checkbox" checked data-guide="settings.security.2fa" data-guide-desc="Two-step verification toggle">Two-step verification</label>
+        <label class="toggle"><input type="checkbox" checked data-guide="settings.security.alerts" data-guide-desc="Alert me about new sign-ins toggle">Alert me about new sign-ins</label>
+        <p><button class="btn" data-guide="settings.security.password" data-guide-desc="Change password button">Change password</button></p>
+        <h3>Trusted devices</h3>
+        <table class="tbl"><tr><th>Device</th><th>Last used</th><th></th></tr>
+          <tr><td>MacBook Pro · Safari</td><td>Today</td><td><button class="btn subtle" data-guide="settings.security.devices.remove.macbook" data-guide-danger data-guide-desc="Remove the MacBook Pro from trusted devices. It will need a code next time">Remove</button></td></tr>
+          <tr><td>iPhone · Northbank app</td><td>Yesterday</td><td><button class="btn subtle" data-guide="settings.security.devices.remove.iphone" data-guide-danger data-guide-desc="Remove the iPhone from trusted devices">Remove</button></td></tr>
+        </table>
+      </div>
+      <div data-panel="limits" data-panel-desc="Transfer limits. The Advanced section is collapsed and holds International transfers and same-day transfers to new payees" hidden>
+        <h2>Transfer limits</h2>
+        <label class="field">Daily limit<input value="2,500.00" data-guide="settings.limits.daily" data-guide-desc="Daily transfer limit field, in dollars. Saves when you leave the field"></label>
+        <label class="field">Per transaction<input value="1,000.00" data-guide="settings.limits.single" data-guide-desc="Per-transaction limit field, in dollars"></label>
+        <button class="section-toggle" data-guide="settings.limits.advanced" data-guide-delegable data-guide-desc="Advanced section header on the Transfer limits page. Collapsed by default; expand it to reach International transfers and Same-day transfers to new payees"><svg><use href="#i-right"/></svg>Advanced</button>
+        <div id="limits-advanced" hidden>
+          <label class="toggle"><input type="checkbox" id="intl-toggle" data-guide="settings.limits.international" data-guide-desc="International transfers toggle inside the Advanced section of Transfer limits. Turning it on asks for a code sent to your phone. The account holder decides this">International transfers</label>
+          <label class="toggle"><input type="checkbox" checked data-guide="settings.limits.newpayee" data-guide-desc="Same-day transfers to new payees toggle inside the Advanced section">Same-day transfers to new payees</label>
+        </div>
+      </div>
+      <div data-panel="notifications" data-panel-desc="Which alerts you receive" hidden>
+        <h2>Notifications</h2>
+        <label class="toggle"><input type="checkbox" checked data-guide="settings.notifications.purchases" data-guide-desc="Alert for every card purchase toggle">Every card purchase</label>
+        <label class="toggle"><input type="checkbox" checked data-guide="settings.notifications.lowbalance" data-guide-desc="Low balance alert toggle">Low balance</label>
+        <label class="toggle"><input type="checkbox" data-guide="settings.notifications.statements" data-guide-desc="New statement alert toggle">New statement ready</label>
+        <label class="toggle"><input type="checkbox" data-guide="settings.notifications.offers" data-guide-desc="Offers and news toggle">Offers and news</label>
+      </div>
+      <div data-panel="documents" data-panel-desc="Tax forms and agreements" hidden>
+        <h2>Documents</h2>
+        <ul class="plain">
+          <li><b>1099-INT 2025</b><button class="btn subtle" data-guide="settings.documents.tax" data-guide-delegable data-guide-desc="Download the 1099-INT tax form"><svg><use href="#i-down"/></svg>PDF</button></li>
+          <li><b>Account agreement</b><button class="btn subtle" data-guide="settings.documents.agreement" data-guide-delegable data-guide-desc="Download the account agreement"><svg><use href="#i-down"/></svg>PDF</button></li>
+          <li><b>Fee schedule</b><button class="btn subtle" data-guide="settings.documents.fees" data-guide-delegable data-guide-desc="Download the fee schedule"><svg><use href="#i-down"/></svg>PDF</button></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
 
 </main>
-</div>
 
-<div class="modal-backdrop" id="notif-modal" data-dialog="edit-notifications" data-dialog-desc="Opens from the Edit button of a row on the Notifications page of project settings" hidden>
+<div class="modal-backdrop" id="tx-modal" data-dialog="transaction" data-dialog-desc="Transaction detail. Opens by clicking a transaction row on the Accounts overview" hidden>
   <div class="modal">
-    <h2 id="notif-modal-title">Edit notifications</h2>
-    <p class="muted">Choose who receives an email when this happens.</p>
-    <div class="checks" id="notif-checks"></div>
-    <div class="row end">
-      <button class="btn subtle" data-guide="notif.cancel" data-guide-desc="Cancel button of the edit notifications dialog">Cancel</button>
-      <button class="btn primary" data-guide="notif.save" data-guide-desc="Save button of the edit notifications dialog. Changes who gets emailed for the whole project, so the person confirms it themselves">Save</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-backdrop" id="issue-modal" data-dialog="issue" data-dialog-desc="The issue panel. Opens by clicking an issue card on the board or an issue in the For you list" hidden>
-  <div class="modal issue">
-    <div class="issue-head">
-      <span class="crumbs"><a href="#board">Atlas Platform</a><span>/</span></span>
-      <div class="menu-anchor">
-        <button class="type-btn" data-guide="issue.type" data-guide-label="Issue type icon" data-opens="issue.type" data-guide-desc="Issue type icon next to the issue key at the top of the issue panel. It looks like decoration but it is a button: opens a menu to change the type between Task, Story and Bug"><span class="type task" id="issue-type-icon"></span><span id="issue-key"></span></button>
-        <div class="menu" data-menu="issue.type" hidden>
-          <div class="menu-head">Change issue type</div>
-          <button data-guide="issue.type.task" data-guide-menu="issue.type" data-guide-desc="Set the issue type to Task, in the type menu"><span class="type task"></span>Task</button>
-          <button data-guide="issue.type.story" data-guide-menu="issue.type" data-guide-desc="Set the issue type to Story, in the type menu"><span class="type story"></span>Story</button>
-          <button data-guide="issue.type.bug" data-guide-menu="issue.type" data-guide-desc="Set the issue type to Bug, in the type menu"><span class="type bug"></span>Bug</button>
-        </div>
-      </div>
+    <div class="modal-head">
+      <div><div class="muted" id="tx-date"></div><h2 id="tx-merchant"></h2></div>
       <span class="spacer"></span>
       <div class="menu-anchor">
-        <button class="icon-btn" data-guide="issue.watch" data-opens="issue.watch" data-guide-desc="Watch options (eye icon with a number) at the top right of the issue panel. Contains Watch this issue and Add watchers"><svg><use href="#i-eye"/></svg><span class="mini" id="issue-watch-count">1</span></button>
-        <div class="menu right" data-menu="issue.watch" hidden>
-          <button data-guide="issue.watch.toggle" data-guide-menu="issue.watch" id="issue-watch-toggle" data-guide-desc="Start or stop watching this issue yourself, in the watch menu">Watch this issue</button>
-          <button data-guide="issue.watch.add" data-guide-menu="issue.watch" data-guide-delegable data-guide-desc="Add watchers, in the watch menu. Reveals a field to type a colleague's name">Add watchers</button>
+        <button class="icon-btn" data-guide="tx.more" data-guide-label="Transaction menu" data-guide-delegable data-opens="tx.more" data-guide-desc="More actions (three dots) at the top right of the transaction dialog. Contains Dispute this charge, Download receipt and Report card lost or stolen"><svg><use href="#i-dots"/></svg></button>
+        <div class="menu right" data-menu="tx.more" hidden>
+          <button data-guide="tx.more.dispute" data-guide-delegable data-guide-menu="tx.more" data-guide-desc="Dispute this charge, in the transaction menu. Reveals the dispute form inside the dialog">Dispute this charge</button>
+          <button data-guide="tx.more.receipt" data-guide-menu="tx.more" data-guide-desc="Download the receipt, in the transaction menu">Download receipt</button>
+          <button class="danger" data-guide="tx.more.lost" data-guide-menu="tx.more" data-guide-danger data-guide-desc="Report the card lost or stolen, in the transaction menu. Blocks the card immediately and orders a replacement">Report card lost or stolen</button>
         </div>
       </div>
-      <button class="icon-btn" data-guide="issue.share" data-guide-desc="Share the issue"><svg><use href="#i-share"/></svg></button>
-      <div class="menu-anchor">
-        <button class="icon-btn" data-guide="issue.more" data-opens="issue.more" data-guide-desc="More actions (three dots) at the top right of the issue panel. Contains Move, Clone, Link issue, Add flag and Delete"><svg><use href="#i-dots"/></svg></button>
-        <div class="menu right" data-menu="issue.more" hidden>
-          <button data-guide="issue.more.move" data-guide-menu="issue.more" data-guide-desc="Move the issue to another project, in the issue menu">Move</button>
-          <button data-guide="issue.more.clone" data-guide-menu="issue.more" data-guide-desc="Clone the issue, in the issue menu">Clone</button>
-          <button data-guide="issue.more.link" data-guide-menu="issue.more" data-guide-desc="Link this issue to another one, in the issue menu">Link issue</button>
-          <button data-guide="issue.more.flag" data-guide-menu="issue.more" id="issue-flag-item" data-guide-desc="Add or remove a flag on this issue, in the issue menu. Flagged issues show yellow on the board">Add flag</button>
-          <button class="danger" data-guide="issue.more.delete" data-guide-menu="issue.more" data-guide-danger data-guide-desc="Delete the issue permanently">Delete</button>
-        </div>
-      </div>
-      <button class="icon-btn" data-guide="issue.close" data-guide-delegable data-guide-desc="Close the issue panel (X at the top right)"><svg><use href="#i-x"/></svg></button>
+      <button class="icon-btn" data-guide="tx.close" data-guide-delegable data-guide-desc="Close the transaction dialog (X at the top right)"><svg><use href="#i-x"/></svg></button>
     </div>
-    <div class="issue-body">
-      <div class="issue-main">
-        <h2 id="issue-title"></h2>
-        <div class="watchers-box" id="watchers-box" hidden>
-          <label class="field">Add watchers<input id="watchers-input" placeholder="Type a name and press Enter" autocomplete="off" data-guide="issue.watchers.input" data-guide-label="Watcher name" data-guide-desc="Add watchers field inside the issue panel. Appears after choosing Add watchers in the watch menu. Type a colleague's name and press Enter"></label>
-          <div class="recips" id="watchers-list"></div>
-        </div>
-        <h3>Description</h3>
-        <p id="issue-desc" class="muted"></p>
-        <h3>Activity</h3>
-        <div id="issue-comments"></div>
-        <textarea id="issue-comment" placeholder="Add a comment…" data-guide="issue.comment" data-guide-desc="Comment box at the bottom of the issue panel"></textarea>
-        <div class="row"><button class="btn primary" data-guide="issue.comment.save" data-guide-desc="Save the comment. Comments are written by the person">Save</button></div>
+    <div class="tx-amount" id="tx-amount"></div>
+    <dl class="meta"><dt>Account</dt><dd id="tx-account"></dd><dt>Category</dt><dd id="tx-category"></dd><dt>Status</dt><dd id="tx-status"></dd><dt>Reference</dt><dd id="tx-ref"></dd></dl>
+    <form id="dispute-form" class="dispute" hidden>
+      <h3>Dispute this charge</h3>
+      <label class="field">Reason<select data-guide="tx.dispute.reason" data-guide-desc="Reason dropdown of the dispute form"><option value="">Choose a reason</option><option>I was charged twice</option><option>I did not receive what I paid for</option><option>The amount is wrong</option><option>I do not recognize this charge</option></select></label>
+      <label class="field">Details<textarea placeholder="Anything that helps us look into it (optional)" data-guide="tx.dispute.details" data-guide-desc="Optional details text box of the dispute form"></textarea></label>
+      <div class="row end">
+        <button type="button" class="btn subtle" data-guide="tx.dispute.cancel" data-guide-desc="Cancel the dispute form">Cancel</button>
+        <button type="submit" class="btn primary" data-guide="tx.dispute.submit" data-guide-desc="Submit dispute button. Files a formal claim with the card network in the person's name, so the person submits it themselves">Submit dispute</button>
       </div>
-      <aside class="issue-side">
-        <label class="field">Status<select id="issue-status" data-guide="issue.status" data-guide-desc="Status dropdown at the top of the issue side panel. Changing it moves the card to the matching column"></select></label>
-        <button class="section-toggle" data-guide="issue.details" data-guide-delegable data-guide-desc="Details section header in the issue side panel. Collapsed by default; expand it to reach Assignee, Labels, Priority, Epic, Due date and Reporter"><svg><use href="#i-right"/></svg>Details</button>
-        <div id="issue-details" hidden>
-          <label class="field">Assignee<select id="issue-assignee" data-guide="issue.assignee" data-guide-desc="Assignee dropdown inside the Details section"></select></label>
-          <label class="field">Labels<div class="chips" id="issue-labels"></div><input id="issue-label-input" placeholder="Type a label and press Enter" autocomplete="off" data-guide="issue.labels" data-guide-desc="Labels field inside the Details section of the open issue. Type a label and press Enter to add it. Saves immediately. Labels are added by the person"></label>
-          <label class="field">Priority<select id="issue-priority" data-guide="issue.priority" data-guide-desc="Priority dropdown inside the Details section"><option>Highest</option><option>High</option><option>Medium</option><option>Low</option></select></label>
-          <label class="field">Epic<input id="issue-epic" readonly data-guide="issue.epic" data-guide-desc="Epic of the issue (read only here)"></label>
-          <label class="field">Due date<input type="date" id="issue-due" data-guide="issue.due" data-guide-desc="Due date field inside the Details section"></label>
-          <label class="field">Reporter<input id="issue-reporter" readonly data-guide="issue.reporter" data-guide-desc="Reporter (read only)"></label>
-        </div>
-        <button class="section-toggle" data-guide="issue.morefields" data-guide-delegable data-guide-desc="More fields section header, collapsed by default: Sprint and Story points"><svg><use href="#i-right"/></svg>More fields</button>
-        <div id="issue-morefields" hidden>
-          <label class="field">Sprint<input value="Sprint 42" readonly></label>
-          <label class="field">Story points<input id="issue-points" value="3" data-guide="issue.points" data-guide-desc="Story points field inside More fields"></label>
-        </div>
-      </aside>
-    </div>
+    </form>
   </div>
+</div>
+
+<div class="modal-backdrop" id="confirm-modal" data-dialog="confirm-international" data-dialog-desc="Confirmation with a code. Opens when the International transfers toggle in Settings › Transfer limits › Advanced is switched on" hidden>
+  <form class="modal small" id="confirm-form">
+    <h2>Confirm it is you</h2>
+    <p class="muted">We sent a 6-digit code to •••• 8821. In this demo any six digits work.</p>
+    <label class="field">Code<input id="confirm-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" data-guide="confirm.code" data-guide-desc="6-digit code field of the confirmation dialog"></label>
+    <div class="row end">
+      <button type="button" class="btn subtle" data-guide="confirm.cancel" data-guide-desc="Cancel. Leaves international transfers off">Cancel</button>
+      <button type="submit" class="btn primary" data-guide="confirm.confirm" data-guide-danger data-guide-desc="Confirm button of the confirmation dialog. Turns on international transfers for this profile. Only the account holder does this, never an agent">Confirm</button>
+    </div>
+  </form>
 </div>
 
 <div class="toast" id="toast" hidden></div>

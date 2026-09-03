@@ -1,6 +1,8 @@
 const mc = () => document.modelContext
 const registry = new Map()
 const calls = []
+let listedNames = null
+const stats = { toolchange: 0 }
 const shownAt = new Map()
 const lastAction = new Map()
 let app = { app: 'this app', state: () => ({}) }
@@ -97,7 +99,7 @@ function whyHidden(el) {
   const box = el.closest('[hidden]')
   const toggle = box && box.previousElementSibling
   if (toggle && toggle.dataset.guide) return `"${id}" is inside the collapsed "${toggle.textContent.trim()}" section. Guide the person to click "${toggle.dataset.guide}" first.`
-  return `"${id}" exists but is not visible right now. It probably appears after another action, for example Add column reveals the name field.`
+  return `"${id}" exists but is not visible right now. It probably appears after another action on this screen, such as a button that reveals a form.`
 }
 
 function whatWasClicked(node) {
@@ -126,7 +128,9 @@ function place() {
     else if (performance.now() > walk.hideAt) clearSpot()
     return
   }
-  const r = walk.el.getBoundingClientRect()
+  const box = walk.el.matches('input[type=checkbox], input[type=radio]') && walk.el.closest('label') || walk.el
+  const r = box.getBoundingClientRect()
+  const e = walk.el.getBoundingClientRect()
   const pad = 6
   spot.style.top = r.top - pad + 'px'
   spot.style.left = r.left - pad + 'px'
@@ -136,15 +140,18 @@ function place() {
   const below = r.bottom + 14 + ch < window.innerHeight
   caption.style.top = (below ? r.bottom + 14 : r.top - ch - 14) + 'px'
   caption.style.left = Math.max(8, Math.min(r.left, window.innerWidth - cw - 8)) + 'px'
-  const pos = `translate(${r.left + r.width * 0.6}px, ${r.top + r.height * 0.55}px)`
+  const pos = `translate(${e.left + e.width * 0.6}px, ${e.top + e.height * 0.55}px)`
   cursor.style.setProperty('--pos', pos)
   cursor.style.transform = pos
+  const d = drawer.getBoundingClientRect()
+  drawer.classList.toggle('aside', !drawer.hidden && r.right > d.left && r.left < d.right && r.bottom > d.top && r.top < d.bottom)
 }
 
 function startWalk() {
   const end = new AbortController()
   walk = { step: 0, target: null, el: null, end }
   register(endTool, { signal: end.signal })
+  logEvent('Tool added: end_walkthrough. It exists only while a guide is running, so the agent\'s tool list changes live')
   requestAnimationFrame(place)
 }
 
@@ -152,6 +159,7 @@ function clearSpot() {
   spot.hidden = true
   caption.hidden = true
   cursor.classList.remove('on')
+  drawer.classList.remove('aside')
   if (walk) walk.el = null
 }
 
@@ -173,6 +181,7 @@ function endWalk(reason) {
   if (walk) {
     walk.end.abort()
     try { if (mc() && typeof mc().unregisterTool === 'function') mc().unregisterTool(endTool.name) } catch {}
+    logEvent('Tool removed: end_walkthrough')
   }
   walk = null
   return { ok: true, steps_completed: steps, reason }
@@ -333,26 +342,15 @@ const labelOf = el => {
   return firstClause(desc(el))
 }
 
-function learned() {
-  try { return JSON.parse(localStorage.getItem('showme.learned') || '[]') } catch { return [] }
-}
-
-function remember(run) {
-  const entry = { title: run.title || `${run.steps.length}-step path`, when: Date.now(), path: run.steps.map(x => labelOf(q(x.element_id))) }
-  try { localStorage.setItem('showme.learned', JSON.stringify([entry, ...learned()].slice(0, 30))) } catch {}
-  run.learned_path = entry.path
-  renderLearned()
-}
-
 function finishRun(run, status, reason) {
   if (run.status !== 'in_progress') return
   run.status = status
   run.reason = reason || null
   if (status === 'completed') {
-    remember(run)
+    run.learned_path = run.steps.map(x => labelOf(q(x.element_id)))
     caption.querySelector('.step').textContent = 'Done ✓'
     caption.querySelector('.text').textContent = 'That was the last step. You did every click yourself.'
-    caption.querySelector('.hint').textContent = 'Saved under Paths you learned in Agent activity'
+    caption.querySelector('.hint').textContent = 'Your agent will tell you the path in one line'
     setTimeout(() => { if (walk && walk.run === run) clearSpot() }, 2500)
   }
   run.waiters.splice(0).forEach(fn => fn())
@@ -452,7 +450,7 @@ const baseTools = [
   },
   {
     name: 'run_walkthrough',
-    description: 'Guide the person through a whole path. Pass every step in order; the page spotlights the first element with your message, waits for the person to click, tick or type it, then moves the spotlight to the next step by itself, so the person never waits for you between steps. Returns completed when they did all steps, interrupted with a reason when they clicked somewhere else or the walkthrough was stopped, blocked when a step was not reachable when its turn came, or in_progress after timeout_seconds (default 40) while the walkthrough keeps running; call it again without steps to keep waiting.',
+    description: 'Guide the person through a whole path. Pass every step in order. The page spotlights each element with your message, waits for the person to click, tick or type, then moves to the next step by itself, so they never wait for you between steps. Returns completed, interrupted (with the reason: they clicked elsewhere or stopped), blocked (a step was not reachable when its turn came), or in_progress after timeout_seconds (default 40) while it keeps running; call again without steps to keep waiting.',
     inputSchema: objSchema({
       steps: {
         type: 'array',
@@ -466,9 +464,10 @@ const baseTools = [
           required: ['element_id', 'message'],
         },
       },
-      title: { type: 'string', description: 'What the person wanted, in their words, e.g. "Add a Code Review column". Saved with the path in their list of learned paths.' },
+      title: { type: 'string', description: 'What the person wanted, in their words, e.g. "Turn on international transfers". Shown in the Agent activity transcript.' },
       timeout_seconds: { type: 'integer', description: 'How long this call waits before returning in_progress. Default 40.' },
     }),
+    annotations: { readOnlyHint: false, untrustedContentHint: true },
     execute: runWalkthrough,
   },
   {
@@ -478,6 +477,7 @@ const baseTools = [
       element_id: elementId,
       value: { type: 'string', description: 'Text to type when the element is a text field' },
     }, ['element_id']),
+    annotations: { readOnlyHint: false, untrustedContentHint: true },
     execute: doStep,
   },
 ]
@@ -486,6 +486,7 @@ const endTool = {
   name: 'end_walkthrough',
   description: 'Finish the current guide: removes the spotlight and the message. Call it when the task is complete or the person wants to stop. Only exists while a walkthrough is active.',
   inputSchema: objSchema(),
+  annotations: { readOnlyHint: false },
   execute: () => endWalk('finished by the agent'),
 }
 
@@ -500,13 +501,15 @@ async function register(def, opts = {}) {
     description: def.description,
     inputSchema: def.inputSchema,
     execute: async (input, ctx) => {
-      const c = { name: def.name, input: input || {}, at: new Date(), who: 'agent' }
+      const c = { name: def.name, input: input || {}, at: new Date(), signal: !!(ctx && ctx.signal) }
+      if (c.signal) ctx.signal.addEventListener('abort', () => { c.aborted = true; renderCalls() }, { once: true })
       calls.unshift(c)
       renderCalls()
       let out
       try { out = await def.execute(input || {}, ctx || {}) }
       catch (e) { out = { ok: false, error: e.message } }
       c.out = out
+      c.done = new Date()
       renderCalls()
       return JSON.stringify(out)
     },
@@ -524,6 +527,7 @@ async function register(def, opts = {}) {
         entry.registered = true
         entry.error = null
         entry.dropped = Object.keys(def.annotations || {}).filter(k => !annotations || !(k in annotations))
+        entry.accepted = annotations ? Object.keys(annotations) : []
         break
       } catch (e) {
         entry.error = e && e.message ? e.message : String(e)
@@ -546,25 +550,34 @@ function buildOverlay() {
   caption.querySelector('.stop').addEventListener('click', () => endWalk('stopped by the person'))
 }
 
+function buildRibbon() {
+  if (!app.hint) return
+  const key = 'showme.ribbon.' + app.app
+  try { if (localStorage.getItem(key)) return } catch {}
+  const r = document.createElement('div')
+  r.className = 'showme-ribbon'
+  r.innerHTML = `<b>Agent-ready site.</b> Open it in ChatGPT's browser, or Chrome with WebMCP, and ask: <q>${esc(app.hint)}</q>${app.also ? ` · Also try <a href="${esc(app.also.url)}">${esc(app.also.name)}</a>` : ''}<button class="close" title="Dismiss">×</button>`
+  r.querySelector('.close').addEventListener('click', () => { r.remove(); try { localStorage.setItem(key, '1') } catch {} })
+  ui.appendChild(r)
+}
+
 function buildDrawer() {
   drawer = document.createElement('aside')
   drawer.className = 'agent-drawer'
   drawer.hidden = true
   drawer.innerHTML = `<header><span class="dot"></span>Agent activity<button class="icon-btn" title="Close"><svg><use href="#i-x"/></svg></button></header>
 <div class="api"></div>
+<h3>WebMCP in this session</h3>
+<ul class="score"></ul>
 <h3>Tools the agent can see right now</h3>
 <ul class="tools"></ul>
+<h3>Transcript · every call goes through document.modelContext</h3>
+<div class="empty empty-calls">No calls yet. Ask your agent how to do something in ${app.app}.</div>
+<ul class="calls"></ul>
 <h3>The map the site publishes</h3>
 <div class="map"></div>
-<details class="mapdump"><summary>Show exactly what get_ui_map returns</summary><pre></pre></details>
-<h3>Paths you learned<span class="count">0</span><span class="clear">clear</span></h3>
-<ol class="learned"></ol>
-<div class="empty-learned empty">Finish a guide and its path is saved here, in this browser.</div>
-<h3>Calls</h3>
-<div class="empty empty-calls">No calls yet. Ask your agent how to do something in Meridian.</div>
-<ul class="calls"></ul>`
+<details class="mapdump"><summary>Show exactly what get_ui_map returns</summary><pre></pre></details>`
   drawer.querySelector('header .icon-btn').addEventListener('click', () => { drawer.hidden = true; document.body.classList.remove('drawer-open') })
-  drawer.querySelector('h3 .clear').addEventListener('click', () => { try { localStorage.removeItem('showme.learned') } catch {} renderLearned() })
   drawer.querySelector('.mapdump').addEventListener('toggle', e => { if (e.target.open) e.target.querySelector('pre').textContent = JSON.stringify(uiMap(), null, 2) })
   document.body.appendChild(drawer)
 }
@@ -581,6 +594,7 @@ async function renderTools() {
   if (!drawer || drawer.hidden) return
   let listed = null
   try { listed = new Set((await mc().getTools()).map(t => t.name)) } catch {}
+  listedNames = listed
   const api = drawer.querySelector('.api')
   if (!mc()) api.textContent = 'This browser does not expose document.modelContext. Tools are only reachable from this page.'
   else if (listed) api.textContent = `The browser lists ${listed.size} tool${listed.size === 1 ? '' : 's'} from this page.`
@@ -595,8 +609,35 @@ async function renderTools() {
     }
     const err = t.error && !(listed && listed.has(t.name)) ? `<div class="err">${t.error}</div>` : ''
     const note = t.dropped && t.dropped.length ? `<div class="note">registered without ${t.dropped.join(', ')}: this browser did not accept it</div>` : ''
-    return `<li data-name="${t.name}" class="${known.size && !known.has(t.name) ? 'new' : ''}">${t.name}${tagFor(t)}${state}</li>${err}${note}`
+    const acc = t.accepted && t.accepted.length ? `<div class="note ok">annotations: ${t.accepted.join(', ')}</div>` : ''
+    return `<li data-name="${t.name}" class="${known.size && !known.has(t.name) ? 'new' : ''}">${t.name}${tagFor(t)}${state}</li>${err}${note}${acc}`
   }).join('')
+  renderScore()
+}
+
+function renderScore() {
+  if (!drawer) return
+  const tools = [...registry.values()]
+  const accepted = [...new Set(tools.flatMap(t => t.accepted || []))]
+  const runs = calls.filter(c => c.name === 'run_walkthrough')
+  const open = runs.find(c => !c.out)
+  const held = Math.round(Math.max(0, ...runs.filter(c => c.out).map(c => (c.done - c.at) / 1000)))
+  const steps = calls.filter(c => c.name === 'do_step_for_person' && c.out)
+  const refused = steps.filter(c => c.out.refused).length
+  const flagged = calls.filter(c => c.out && (registry.get(c.name)?.accepted || []).includes('untrustedContentHint')).length
+  const signals = calls.filter(c => c.signal).length
+  const aborted = calls.filter(c => c.aborted).length
+  const rows = [
+    ['registerTool', tools.length, `${tools.length} tools registered from this page`],
+    ['annotations', accepted.length, accepted.length ? `accepted by this browser: ${accepted.join(', ')}` : 'none accepted by this browser'],
+    ['getTools', listedNames, listedNames ? `the browser lists ${listedNames.size} tools right now` : 'not available in this browser'],
+    ['toolchange', stats.toolchange, stats.toolchange ? `${stats.toolchange} events fired by the browser` : 'no event fired yet'],
+    ['long-running execute', runs.length, open ? `run_walkthrough open for ${Math.round((Date.now() - open.at) / 1000)}s while you act` : held ? `run_walkthrough held open ${held}s while you acted` : 'no walkthrough yet'],
+    ['AbortSignal', signals, signals ? `received on ${signals} calls, ${aborted} aborted by the agent` : 'no signal received yet'],
+    ['policy in the markup', steps.length, steps.length ? `${steps.length - refused} steps delegated, ${refused} refused by ${app.app}` : 'no step requested yet'],
+    ['untrustedContentHint', flagged, flagged ? `${flagged} results carried people-typed text, flagged for the agent` : 'no flagged result yet'],
+  ]
+  drawer.querySelector('.score').innerHTML = rows.map(([k, on, text]) => `<li class="${on ? 'on' : ''}"><span class="dot"></span><code>${k}</code><span>${esc(text)}</span></li>`).join('')
 }
 
 function renderMap() {
@@ -609,27 +650,70 @@ function renderMap() {
   if (dump.open) dump.querySelector('pre').textContent = JSON.stringify(m, null, 2)
 }
 
-function renderLearned() {
-  if (!drawer) return
-  const list = learned()
-  drawer.querySelector('h3 .count').textContent = list.length
-  drawer.querySelector('.empty-learned').hidden = list.length > 0
-  drawer.querySelector('.learned').innerHTML = list.map(e => {
-    const when = new Date(e.when).toLocaleString([], { hour: '2-digit', minute: '2-digit' })
-    return `<li><div class="title"><span>${esc(e.title)}</span><span class="when">${when}</span></div><div class="path">${e.path.map(esc).join(' <b>›</b> ')}</div></li>`
-  }).join('')
+const esc = v => String(v).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]))
+
+function logEvent(text) {
+  calls.unshift({ event: text, at: new Date() })
+  renderCalls()
 }
 
-const esc = v => String(v).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]))
+const mapSize = m => m.screens.flatMap(x => x.elements).length + m.dialogs.flatMap(x => x.elements).length + m.always_available.length
+const nameOf = id => labelOf(q(id))
+const secs = (from, to) => Math.round(((to || Date.now()) - from) / 1000)
+
+function headline(c) {
+  const i = c.input, o = c.out, site = app.app
+  switch (c.name) {
+    case 'get_ui_map':
+      return [`Agent asked for the map of ${site}`, o && `${site} answered: ${mapSize(o)} elements across ${o.screens.length} screens and ${o.dialogs.length} dialogs, plus ${o.how_to_guide.length} guiding rules written by the site`]
+    case 'get_current_view':
+      return ['Agent asked where you are', o && `${site} answered: ${o.screen ? o.screen.title : 'no screen'}${o.panel ? ' › ' + o.panel : ''}${o.open_dialog ? `, dialog "${o.open_dialog}" open` : ''}${o.open_menu ? `, menu "${o.open_menu}" open` : ''}, ${o.visible_elements.length} elements visible`]
+    case 'run_walkthrough': {
+      const n = Array.isArray(i.steps) ? i.steps.length : 0
+      const head = n ? `Agent handed over a ${n}-step path${i.title ? ': ' + i.title : ''}` : 'Agent kept waiting on the running path'
+      if (!o) return [head, null]
+      if (o.ok === false) return [head, `${site} answered: ${o.error}`]
+      const tail = {
+        completed: `completed, you did all ${o.steps_total} steps yourself`,
+        interrupted: `interrupted after ${o.completed_steps.length} of ${o.steps_total} steps. ${o.reason}`,
+        blocked: `blocked. ${o.reason}`,
+        in_progress: `still running after ${o.completed_steps.length} of ${o.steps_total} steps, the agent calls again`,
+      }[o.status]
+      return [head, `${site} answered after ${secs(c.at, c.done)}s: ${tail}`]
+    }
+    case 'do_step_for_person':
+      return [`Agent asked to do "${nameOf(i.element_id)}" for you`, o && (o.refused ? `${site} refused. ${o.reason}` : o.ok ? `${site} allowed it and ${o.did}` : `${site} answered: ${o.error}`)]
+    case 'end_walkthrough':
+      return ['Agent ended the guide', o && `${site} answered: ${o.steps_completed} steps had been completed`]
+  }
+  return [c.name, o && short(o)]
+}
+
+function liveLine(c) {
+  const run = c.name === 'run_walkthrough' && walk && walk.run
+  if (!run) return `open for ${secs(c.at)}s`
+  const step = run.steps[run.index]
+  return `open for ${secs(c.at)}s · waiting for you · step ${run.index + 1} of ${run.steps.length}${step ? ' · ' + esc(nameOf(step.element_id)) : ''}`
+}
 
 function renderCalls() {
   if (!drawer) return
   renderMap()
+  renderScore()
   drawer.querySelector('.empty-calls').hidden = calls.length > 0
   drawer.querySelector('.calls').innerHTML = calls.slice(0, 40).map(c => {
-    const bad = c.out && (c.out.ok === false || c.out.done === false)
     const t = c.at.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-    return `<li><span class="who">${t} · ${c.who}</span><br><span class="name">${c.name}</span>(${short(c.input).replace(/^\{\}$/, '')})<div class="res${bad ? ' bad' : ''}">${c.out ? short(c.out) : '…'}</div></li>`
+    if (c.event) return `<li class="event"><span class="who">${t} · ${app.app}</span><div class="ev">${esc(c.event)}</div></li>`
+    const bad = c.out && (c.out.ok === false || c.out.refused || c.out.status === 'interrupted' || c.out.status === 'blocked')
+    const [head, tail] = headline(c)
+    const acts = c.out ? c.out.completed_steps : (c.name === 'run_walkthrough' && walk && walk.run ? walk.run.results : null)
+    const you = acts && acts.length ? `<ul class="you">${acts.map(s => `<li>${esc(nameOf(s.element_id))} · ${esc(s.action)}</li>`).join('')}</ul>` : ''
+    const flags = [c.signal ? 'signal' : '', c.aborted ? 'aborted' : ''].filter(Boolean).map(f => ` · ${f}`).join('')
+    return `<li class="${c.out ? '' : 'pending'}"><span class="who">${t} · <span class="name">${c.name}</span>${flags}</span>
+<div class="head">${esc(head)}</div>
+${c.out ? `<div class="res${bad ? ' bad' : ''}">${esc(tail)}</div>` : `<div class="live"><span class="pulse"></span>${liveLine(c)}</div>`}
+${you}
+<div class="raw">${esc(short(c.input)).replace(/^\{\}$/, '')}${c.out ? ' → ' + esc(short(c.out)) : ''}</div></li>`
   }).join('')
 }
 
@@ -643,35 +727,33 @@ function trackActions() {
   document.addEventListener('input', mark, true)
 }
 
+let tick
 export function toggleDrawer() {
   drawer.hidden = !drawer.hidden
   document.body.classList.toggle('drawer-open', !drawer.hidden)
-  if (!drawer.hidden) { renderTools(); renderCalls(); renderMap(); renderLearned() }
+  clearInterval(tick)
+  if (!drawer.hidden) {
+    renderTools(); renderCalls(); renderMap()
+    tick = setInterval(() => { if (calls.some(c => !c.event && !c.out)) renderCalls() }, 1000)
+  }
 }
 
 export async function startGuide(opts) {
   app = { ...app, ...opts }
   buildOverlay()
   buildDrawer()
+  buildRibbon()
   trackActions()
   for (let i = 0; i < 25 && !mc(); i++) await sleep(200)
   const m = mc()
+  const onToolChange = () => { stats.toolchange++; renderTools() }
   if (!m) console.warn('document.modelContext is not available in this browser, the tools are only reachable from this page')
-  else if (typeof m.addEventListener === 'function') m.addEventListener('toolchange', renderTools)
-  else if ('ontoolchange' in m) m.ontoolchange = renderTools
+  else if (typeof m.addEventListener === 'function') m.addEventListener('toolchange', onToolChange)
+  else if ('ontoolchange' in m) m.ontoolchange = onToolChange
   for (const t of baseTools) await register(t)
+  const accepted = [...new Set([...registry.values()].flatMap(t => t.accepted || []))]
+  logEvent(m ? `Registered ${registry.size} tools with document.modelContext.registerTool${accepted.length ? ' · annotations accepted: ' + accepted.join(', ') : ''}` : 'document.modelContext is not available in this browser: tools are only reachable from this page')
   window.showme = {
     state: () => ({ target: walk ? walk.target : null, step: walk ? walk.step : 0, run: walk && walk.run ? { index: walk.run.index, status: walk.run.status } : null }),
   }
-}
-
-export const drawerHost = () => drawer
-
-export const fallback = {
-  tools: () => [...registry.values()].map(t => ({ name: t.name, description: t.description, inputSchema: t.inputSchema })),
-  run: async (name, input) => {
-    const entry = registry.get(name)
-    if (!entry) return { ok: false, error: 'unknown tool ' + name }
-    return JSON.parse(await entry.execute(input || {}, {}))
-  },
 }
