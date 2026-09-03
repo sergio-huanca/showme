@@ -264,6 +264,7 @@ function toggleSection(btn, sel) {
   btn.setAttribute('aria-expanded', String(!box.hidden))
 }
 
+const wired = /^(nav\.create|boardsettings\.columns\.(add|cancel|delete\.)|notif\.(cancel|save)|projectsettings\.(automation\.create|notifications\.edit\.))/
 document.addEventListener('click', e => {
   const act = e.target.closest('[data-guide]')
   if (act && actions[act.dataset.guide]) {
@@ -318,6 +319,7 @@ document.addEventListener('click', e => {
     e.preventDefault()
     toast(`"${a.textContent.trim()}" is not wired up in this demo`)
   }
+  if (act && act.tagName === 'BUTTON' && !act.form && act.id !== 'agent-activity-btn' && !wired.test(act.dataset.guide)) toast(`"${act.getAttribute('aria-label') || act.textContent.trim()}" is not wired up in this demo`)
 })
 
 $('#issue-label-input').addEventListener('keydown', e => {

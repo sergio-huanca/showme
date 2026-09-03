@@ -49,6 +49,8 @@ Meridian:
 
 Click the wrong thing on purpose once and watch the agent notice. Open **Agent activity** before you ask and the scoreboard lights up as things happen.
 
+**What's wired up.** Both sites are fakes, so not every button does something, but every button tells you which it is. In PeruBank the things that really change state are: turning international transfers on and off (with the code dialog), moving money between accounts or to a payee, the international transfer form once it's enabled, freezing cards and the card controls, disputing a transaction, the transaction search, and every field and toggle under Settings. In Meridian: board search, opening issues and everything in the issue panel (labels, type, watchers, flag, comments, assignee, priority, due date, status), adding and deleting board columns and their WIP limits, notification recipients and automation rules in project settings, and all the navigation including the narrow-screen menu. Anything else (pay a bill, download a statement, the app switcher, the board filters, the create buttons on placeholder screens) shows a small "not wired up in this demo" note when you click it, so nothing fails silently.
+
 **In Chrome 149+**: turn on `chrome://flags/#enable-webmcp-testing`, open the URL, and call the tools from DevTools (Application › WebMCP) or the [Model Context Tool Inspector](https://github.com/GoogleChromeLabs/webmcp-tools) extension. There's also a `check.html` next to the sites that tells you whether the browser you're in has the API at all.
 
 **Locally**:

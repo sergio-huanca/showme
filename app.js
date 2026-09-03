@@ -185,7 +185,7 @@ document.addEventListener('click', e => {
   }
   if (!e.target.closest('.menu-anchor')) closeMenus()
   if (e.target === txModal) txModal.hidden = true
-  if (act && act.tagName === 'BUTTON' && !act.form && act.id !== 'agent-activity-btn') toast(`"${act.textContent.trim()}" is not wired up in this demo`)
+  if (act && act.tagName === 'BUTTON' && !act.form && act.id !== 'agent-activity-btn') toast(`"${act.getAttribute('aria-label') || act.textContent.trim()}" is not wired up in this demo`)
 })
 
 const amountOf = input => {
