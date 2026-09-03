@@ -99,19 +99,6 @@ Something that confused me at first: the agent's call log is really short. It re
 
 ![Agent activity on PeruBank after a guide: the WebMCP scoreboard](docs/bank-drawer.png)
 
-## How it's different from what exists
-
-| | Help article | Scripted tour (Pendo, Intro.js) | Screen-reading agent | ShowMe on WebMCP |
-|---|---|---|---|---|
-| Who plans the path | a writer, once | the site, one tour at a time | the model, from pixels | the agent, from the site's own map, for any question |
-| Matches your screen | no | for the tours the site wrote | mostly | yes, read from the live DOM on every call |
-| Waits for you to do the step | no | yes | no, it acts or guesses | yes, as a structured tool result |
-| Knows what you did | no | yes | no | yes: clicked, typed what, chose what |
-| Site decides what an agent may do | n/a | n/a | no | yes, in the markup |
-| Works with any agent | n/a | n/a | one vendor | any agent in a WebMCP browser |
-
-Microsoft's Copilot Vision "Highlights" is the closest thing I know of, and it proved people want "show me how". But it works from pixels, for one assistant, and it can't know whether you did the step or whether the site would even let an agent do it.
-
 ## Reading the code
 
 It's all in [`showme.js`](showme.js), about 750 lines of vanilla JavaScript, no build step. If you only have five minutes, read `register()`, `runWalkthrough()` and `doStep()`. `uiMap()` builds the map, `waitFor()` is the wait for one real human action, `whyHidden()` works out what has to be opened first and says so in a sentence the agent can act on.
