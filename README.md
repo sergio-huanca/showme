@@ -125,7 +125,7 @@ Two files and three attributes, more or less. Link the layer, start it with the 
 
 The map is rebuilt from the live DOM on every call, so anything rendered dynamically (transaction rows, the WIP limit fields for each column, the checkboxes in a dialog) is included without doing anything. The overlay and the drawer take their colours from `--showme-*` variables, which is why the spotlight is teal on PeruBank and blue on Meridian with the same two files. `startGuide({ hint, also })` shows the little first-visit card that suggests a question.
 
-One honest caveat: the layer also expects menus to be `.menu` elements with a `data-menu` attribute and hidden things to use the `hidden` attribute, because that's how I built PeruBank and Meridian. I haven't tried it on a site built some other way yet.
+One honest caveat: the map only knows about screens that are in the DOM. PeruBank and Meridian keep every screen on the page and hide the inactive ones, so the agent sees all of them. A router that unmounts inactive screens would show the agent just the current one. I haven't tried it on a site built that way yet.
 
 ## What I deliberately didn't use
 

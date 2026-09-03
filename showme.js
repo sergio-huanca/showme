@@ -29,7 +29,7 @@ function kind(el) {
   if (t === 'input') return el.type === 'checkbox' ? 'checkbox' : el.type === 'search' ? 'search box' : 'text field'
   if (t === 'select') return 'dropdown'
   if (t === 'textarea') return 'text field'
-  if (el.closest('.menu')) return 'menu item'
+  if (el.closest('[data-menu]')) return 'menu item'
   if (t === 'a') return el.classList.contains('tab') ? 'tab' : 'link'
   return 'button'
 }
@@ -52,14 +52,14 @@ function uiMap() {
     id: s.dataset.screen,
     title: s.querySelector('h1')?.textContent.trim() || s.dataset.screen,
     what: s.dataset.screenDesc,
-    current: !s.hidden,
-    panels: [...s.querySelectorAll('[data-panel]')].map(p => ({ id: p.dataset.panel, what: p.dataset.panelDesc, current: !p.hidden })),
+    current: visible(s),
+    panels: [...s.querySelectorAll('[data-panel]')].map(p => ({ id: p.dataset.panel, what: p.dataset.panelDesc, current: visible(p) })),
     elements: [...s.querySelectorAll('[data-guide]')].map(describe),
   }))
   const dialogs = [...document.querySelectorAll('[data-dialog]')].map(d => ({
     id: d.dataset.dialog,
     what: d.dataset.dialogDesc,
-    open: !d.hidden,
+    open: visible(d),
     elements: [...d.querySelectorAll('[data-guide]')].map(describe),
   }))
   const global = [...document.querySelectorAll('[data-guide]')].filter(el => !el.closest('[data-screen]') && !el.closest('[data-dialog]')).map(describe)
@@ -67,10 +67,10 @@ function uiMap() {
 }
 
 function view() {
-  const s = [...document.querySelectorAll('[data-screen]')].find(x => !x.hidden)
-  const p = s && [...s.querySelectorAll('[data-panel]')].find(x => !x.hidden)
-  const menu = document.querySelector('.menu:not([hidden])')
-  const dialog = [...document.querySelectorAll('[data-dialog]')].find(x => !x.hidden)
+  const s = [...document.querySelectorAll('[data-screen]')].find(visible)
+  const p = s && [...s.querySelectorAll('[data-panel]')].find(visible)
+  const menu = [...document.querySelectorAll('[data-menu]')].find(visible)
+  const dialog = [...document.querySelectorAll('[data-dialog]')].find(visible)
   return {
     screen: s ? { id: s.dataset.screen, title: s.querySelector('h1')?.textContent.trim() } : null,
     panel: p ? p.dataset.panel : null,
@@ -91,13 +91,14 @@ function whyHidden(el) {
   const region = el.closest('[data-region]')
   if (region && !visible(region)) return `"${id}" is in the ${region.dataset.region}, which is closed at this screen size. Guide the person to open it first with "${region.dataset.regionOpener}".`
   const dialog = el.closest('[data-dialog]')
-  if (dialog && dialog.hidden) return `"${id}" lives in the "${dialog.dataset.dialog}" dialog, which is not open. ${dialog.dataset.dialogDesc || ''}`
+  if (dialog && !visible(dialog)) return `"${id}" lives in the "${dialog.dataset.dialog}" dialog, which is not open. ${dialog.dataset.dialogDesc || ''}`
   const screen = el.closest('[data-screen]')
-  if (screen && screen.hidden) return `"${id}" is on the "${screen.dataset.screen}" screen and the person is on "${view().screen?.id}". Guide them there first through an element whose "opens" is "${screen.dataset.screen}".`
+  if (screen && !visible(screen)) return `"${id}" is on the "${screen.dataset.screen}" screen and the person is on "${view().screen?.id}". Guide them there first through an element whose "opens" is "${screen.dataset.screen}".`
   const panel = el.closest('[data-panel]')
-  if (panel && panel.hidden) return `"${id}" is in the "${panel.dataset.panel}" panel, which is not selected. Guide them to the "${panel.dataset.panel}" tab first.`
-  const box = el.closest('[hidden]')
-  const toggle = box && box.previousElementSibling
+  if (panel && !visible(panel)) return `"${id}" is in the "${panel.dataset.panel}" panel, which is not selected. Guide them to the "${panel.dataset.panel}" tab first.`
+  let box = el
+  while (box.parentElement && !visible(box.parentElement)) box = box.parentElement
+  const toggle = box.previousElementSibling
   if (toggle && toggle.dataset.guide) return `"${id}" is inside the collapsed "${toggle.textContent.trim()}" section. Guide the person to click "${toggle.dataset.guide}" first.`
   return `"${id}" exists but is not visible right now. It probably appears after another action on this screen, such as a button that reveals a form.`
 }
@@ -433,17 +434,17 @@ async function runWalkthrough({ steps, title, timeout_seconds }, ctx = {}) {
 const objSchema = (props = {}, required = []) => ({ type: 'object', properties: props, ...(required.length ? { required } : {}) })
 const elementId = { type: 'string', description: 'Element id from get_ui_map, for example board.more' }
 
-const baseTools = [
+const baseTools = () => [
   {
     name: 'get_ui_map',
-    description: 'Map of every screen, panel, menu and interactive element of Meridian, with the ids the other tools accept and short instructions on how to guide. Call it once at the start of a guide. Read-only; names typed by people (columns, issue titles) appear in it.',
+    description: `Map of every screen, panel, menu and interactive element of ${app.app}, with the ids the other tools accept and short instructions on how to guide. Call it once at the start of a guide. Read-only; names typed by people appear in it.`,
     inputSchema: objSchema(),
     annotations: { readOnlyHint: true, untrustedContentHint: true },
     execute: uiMap,
   },
   {
     name: 'get_current_view',
-    description: 'Where the person is right now: current screen and panel, any open menu or dialog, which element ids are visible, the state of the walkthrough, and a snapshot of app data such as board columns and notification recipients. Read-only.',
+    description: 'Where the person is right now: current screen and panel, any open menu or dialog, which element ids are visible, the state of the walkthrough, and a snapshot of app data. Read-only.',
     inputSchema: objSchema(),
     annotations: { readOnlyHint: true, untrustedContentHint: true },
     execute: view,
@@ -472,7 +473,7 @@ const baseTools = [
   },
   {
     name: 'do_step_for_person',
-    description: 'Perform one step on behalf of the person, only when they explicitly ask you to. Meridian allows this for navigation and search boxes and refuses configuration changes, which the person makes themselves. Returns refused:true with the policy when not allowed.',
+    description: `Perform one step on behalf of the person, only when they explicitly ask you to. ${app.app} allows this for navigation and search boxes and refuses anything else, which the person does themselves. Returns refused:true with the policy when not allowed.`,
     inputSchema: objSchema({
       element_id: elementId,
       value: { type: 'string', description: 'Text to type when the element is a text field' },
@@ -750,7 +751,7 @@ export async function startGuide(opts) {
   if (!m) console.warn('document.modelContext is not available in this browser, the tools are only reachable from this page')
   else if (typeof m.addEventListener === 'function') m.addEventListener('toolchange', onToolChange)
   else if ('ontoolchange' in m) m.ontoolchange = onToolChange
-  for (const t of baseTools) await register(t)
+  for (const t of baseTools()) await register(t)
   const accepted = [...new Set([...registry.values()].flatMap(t => t.accepted || []))]
   logEvent(m ? `Registered ${registry.size} tools with document.modelContext.registerTool${accepted.length ? ' · annotations accepted: ' + accepted.join(', ') : ''}` : 'document.modelContext is not available in this browser: tools are only reachable from this page')
   window.showme = {
