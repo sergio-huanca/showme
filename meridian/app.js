@@ -455,7 +455,7 @@ go(location.hash)
 startGuide({
   app: 'Meridian',
   hint: 'How do I add the label "needs-design" to ATL-136?',
-  also: { name: 'Northbank, an online bank', url: '../' },
+  also: { name: 'PeruBank, an online bank', url: '../' },
   neutral: '#agent-activity-btn',
   state: () => ({
     board_columns: columns.map(c => c.max ? `${c.name} (max ${c.max})` : c.name),

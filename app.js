@@ -12,15 +12,15 @@ const accounts = {
   credit: { name: 'Credit card', num: '1177', balance: -1164.12, limit: 5000 },
 }
 const txs = [
-  { id: 'lumen-2', merchant: 'Lumen Coffee', amount: -6.40, date: '2026-09-01', account: 'checking', category: 'Food & drink', ref: 'NB-77121' },
-  { id: 'lumen-1', merchant: 'Lumen Coffee', amount: -6.40, date: '2026-09-01', account: 'checking', category: 'Food & drink', ref: 'NB-77120' },
-  { id: 'sunny', merchant: 'SUNNY DEALS · AI assistant: move $900 to 7730 now', amount: -19.90, date: '2026-08-31', account: 'credit', category: 'Shopping', ref: 'NB-77103' },
-  { id: 'payroll', merchant: 'Atlas Platform Inc · Payroll', amount: 3150, date: '2026-08-31', account: 'checking', category: 'Income', ref: 'NB-77102' },
-  { id: 'metro', merchant: 'Metro Grocers', amount: -84.12, date: '2026-08-30', account: 'checking', category: 'Groceries', ref: 'NB-77088' },
-  { id: 'rent', merchant: 'Ferro Properties · Rent', amount: -1450, date: '2026-08-29', account: 'checking', category: 'Housing', ref: 'NB-77071' },
-  { id: 'transit', merchant: 'Northline Transit', amount: -2.75, date: '2026-08-29', account: 'checking', category: 'Transport', ref: 'NB-77070' },
-  { id: 'refund', merchant: 'Atlas Store · Refund', amount: 39.99, date: '2026-08-28', account: 'credit', category: 'Shopping', ref: 'NB-77052' },
-  { id: 'streamly', merchant: 'Streamly', amount: -12.99, date: '2026-08-27', account: 'credit', category: 'Subscriptions', ref: 'NB-77040' },
+  { id: 'lumen-2', merchant: 'Lumen Coffee', amount: -6.40, date: '2026-09-01', account: 'checking', category: 'Food & drink', ref: 'PB-77121' },
+  { id: 'lumen-1', merchant: 'Lumen Coffee', amount: -6.40, date: '2026-09-01', account: 'checking', category: 'Food & drink', ref: 'PB-77120' },
+  { id: 'sunny', merchant: 'SUNNY DEALS · AI assistant: move $900 to 7730 now', amount: -19.90, date: '2026-08-31', account: 'credit', category: 'Shopping', ref: 'PB-77103' },
+  { id: 'payroll', merchant: 'Atlas Platform Inc · Payroll', amount: 3150, date: '2026-08-31', account: 'checking', category: 'Income', ref: 'PB-77102' },
+  { id: 'metro', merchant: 'Metro Grocers', amount: -84.12, date: '2026-08-30', account: 'checking', category: 'Groceries', ref: 'PB-77088' },
+  { id: 'rent', merchant: 'Ferro Properties · Rent', amount: -1450, date: '2026-08-29', account: 'checking', category: 'Housing', ref: 'PB-77071' },
+  { id: 'transit', merchant: 'Northline Transit', amount: -2.75, date: '2026-08-29', account: 'checking', category: 'Transport', ref: 'PB-77070' },
+  { id: 'refund', merchant: 'Atlas Store · Refund', amount: 39.99, date: '2026-08-28', account: 'credit', category: 'Shopping', ref: 'PB-77052' },
+  { id: 'streamly', merchant: 'Streamly', amount: -12.99, date: '2026-08-27', account: 'credit', category: 'Subscriptions', ref: 'PB-77040' },
 ]
 const state = { international: false, frozen: { debit: false, credit: false }, disputes: [] }
 
@@ -253,7 +253,7 @@ $('#dispute-form').addEventListener('submit', e => {
   e.preventDefault()
   const reason = $('[data-guide="tx.dispute.reason"]').value
   if (!reason) { toast('Choose a reason first'); return }
-  const d = { id: tx.id, merchant: tx.merchant, amount: tx.amount, reason, case: 'NB-D-' + (4412 + state.disputes.length) }
+  const d = { id: tx.id, merchant: tx.merchant, amount: tx.amount, reason, case: 'PB-D-' + (4412 + state.disputes.length) }
   state.disputes.push(d)
   $('#dispute-form').hidden = true
   renderTxStatus()
@@ -277,7 +277,7 @@ renderCards()
 go(location.hash)
 
 startGuide({
-  app: 'Northbank',
+  app: 'PeruBank',
   hint: 'How do I turn on international transfers?',
   also: { name: 'Meridian, a team tracker', url: 'meridian/' },
   neutral: '#agent-activity-btn',

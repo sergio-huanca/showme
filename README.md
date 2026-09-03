@@ -1,16 +1,16 @@
 # ShowMe · agents that teach instead of doing
 
-**Live demo:** https://sergio-huanca.github.io/showme/ is Northbank, https://sergio-huanca.github.io/showme/meridian/ is Meridian.
+**Live demo:** https://sergio-huanca.github.io/showme/ is PeruBank, https://sergio-huanca.github.io/showme/meridian/ is Meridian.
 **Video:** I'll put the YouTube link here once it's recorded.
 
 ShowMe is my entry for OpenAI's WebMCP Challenge. It's a small layer you add to a web app so an AI agent can show people where things are, instead of doing things for them. You ask your agent "how do I turn on international transfers?", the site hands the agent a map of its own interface, the agent plans the path and then lights up one element at a time. You do every click yourself. If you click somewhere else the page notices and the agent re-plans. Nothing on the page changes unless you changed it.
 
 I built two fake sites to show it, and neither of them has any tour code in it:
 
-- **Northbank** is a made-up online bank. The switch for international transfers is four levels deep (profile menu, a settings tab, a collapsed "Advanced" section), and the final Confirm is a button I never want an agent pressing. Disputing a charge is behind three dots inside a dialog. Freezing a card is behind three dots on the card.
+- **PeruBank** is a made-up online bank. The switch for international transfers is four levels deep (profile menu, a settings tab, a collapsed "Advanced" section), and the final Confirm is a button I never want an agent pressing. Disputing a charge is behind three dots inside a dialog. Freezing a card is behind three dots on the card.
 - **Meridian** at `/meridian/` is a Jira-style tracker: board settings behind one three-dots menu, project settings behind another, a Labels field inside a collapsed section, and a type icon that nobody realises is a button.
 
-![The agent spotlights the Confirm button in Northbank. Asked to press it, Northbank refuses](docs/bank-confirm.png)
+![The agent spotlights the Confirm button in PeruBank. Asked to press it, PeruBank refuses](docs/bank-confirm.png)
 
 ## Why I built it
 
@@ -24,7 +24,7 @@ The site also decides which steps an agent is ever allowed to do for you (open a
 
 Support teams first. "Where is X" is the question help centers answer over and over, and the answer never matches the reader's screen. With this the site answers on the reader's own screen, and the sentences it needs are the ones the help center already wrote.
 
-Then regulated products: banks, health portals, admin consoles. Places where an agent shouldn't act but the person still needs help. That's what Northbank is for. The agent can teach you how to move your money without being able to move your money.
+Then regulated products: banks, health portals, admin consoles. Places where an agent shouldn't act but the person still needs help. That's what PeruBank is for. The agent can teach you how to move your money without being able to move your money.
 
 And anyone learning a tool. A new hire on the team tracker, a parent on online banking. That's Meridian. You do every step, the agent says the path back to you in one line at the end, and the second time you probably don't need it.
 
@@ -32,10 +32,10 @@ And anyone learning a tool. A new hire on the team tracker, a parent on online b
 
 **In the ChatGPT desktop app** (its browser has WebMCP built in): open the live URL in ChatGPT's browser, click **Site tools** in the address bar to see what the site exposes, and ask. A small card on each site suggests a first question. Close it and it stays closed.
 
-Northbank:
+PeruBank:
 
 1. `How do I turn on international transfers?` Profile menu, settings tab, collapsed section, toggle, confirmation code.
-2. While the profile menu is lit: `Just do it for me.` Northbank lets the agent open a menu. When Confirm lights up, ask again. Northbank refuses, the agent explains, you press it.
+2. While the profile menu is lit: `Just do it for me.` PeruBank lets the agent open a menu. When Confirm lights up, ask again. PeruBank refuses, the agent explains, you press it.
 3. Now switch it off yourself, no agent: profile menu › Settings › Transfer limits › Advanced. Four clicks. That's the part I actually care about.
 4. `Lumen Coffee charged me twice. How do I dispute it?` The dispute form is behind three dots inside the transaction dialog.
 5. `What did I spend this week?` One merchant descriptor in the list carries instructions for the agent. It only reaches the agent through a result flagged `untrustedContentHint`, and even a fooled model couldn't move money, because Transfer is marked irreversible in the markup.
@@ -55,7 +55,7 @@ Click the wrong thing on purpose once and watch the agent notice. Open **Agent a
 
 ```
 npm install
-npm start          # http://localhost:8080 is Northbank, http://localhost:8080/meridian/ is Meridian
+npm start          # http://localhost:8080 is PeruBank, http://localhost:8080/meridian/ is Meridian
 npm test           # Playwright drives both sites through document.modelContext in your installed Chrome; screenshots land in test/shots
 ```
 
@@ -73,9 +73,7 @@ Registration goes through `document.modelContext.registerTool`. If a browser rej
 
 Something that confused me at first: the agent's call log is really short. It reads the map once and calls `run_walkthrough` once per path, and everything interesting happens inside that one call. So the drawer shows what's going on inside it. The **WebMCP in this session** scoreboard has one line per API feature, and a line only lights up once that thing has actually happened: tools registered and which annotations the browser accepted, what `getTools` lists, `toolchange` events, how many seconds the long-running call has been open while you act, abort signals, steps delegated or refused by the markup, results flagged as people-typed text. Under it there's a transcript that reads like a conversation: what the agent asked, what the site answered, how long it took, and every click, tick and keystroke you did. The panel floats over the page like a dropdown instead of pushing it around, and if a spotlighted step happens to sit underneath it, the panel fades out and lets the click through until the next step.
 
-![Agent activity on Northbank after a guide: the WebMCP scoreboard](docs/bank-drawer.png)
-
-![The transcript: the refused step, the tool that appeared, the seven-step path and every action the person took](docs/bank-transcript.png)
+![Agent activity on PeruBank after a guide: the WebMCP scoreboard](docs/bank-drawer.png)
 
 ## How it's different from what exists
 
@@ -109,7 +107,7 @@ Two files and three attributes, more or less. Link the layer, start it with the 
 <link rel="stylesheet" href="showme.css">
 <script type="module">
   import { startGuide } from './showme.js'
-  startGuide({ app: 'Northbank', state: () => ({ international_transfers: 'off' }) })
+  startGuide({ app: 'PeruBank', state: () => ({ international_transfers: 'off' }) })
 </script>
 
 <button data-guide="settings.limits.advanced"
@@ -123,9 +121,9 @@ Two files and three attributes, more or less. Link the layer, start it with the 
 - `data-guide-goto="screen-id"` says where a click leads, `data-guide-menu="opener-id"` says the element lives inside a menu, `data-guide-danger` marks things that can't be undone, which are never delegated.
 - `data-screen`, `data-panel` and `data-dialog` group elements so the agent knows what has to be open first.
 
-The map is rebuilt from the live DOM on every call, so anything rendered dynamically (transaction rows, the WIP limit fields for each column, the checkboxes in a dialog) is included without doing anything. The overlay and the drawer take their colours from `--showme-*` variables, which is why the spotlight is teal on Northbank and blue on Meridian with the same two files. `startGuide({ hint, also })` shows the little first-visit card that suggests a question.
+The map is rebuilt from the live DOM on every call, so anything rendered dynamically (transaction rows, the WIP limit fields for each column, the checkboxes in a dialog) is included without doing anything. The overlay and the drawer take their colours from `--showme-*` variables, which is why the spotlight is teal on PeruBank and blue on Meridian with the same two files. `startGuide({ hint, also })` shows the little first-visit card that suggests a question.
 
-One honest caveat: the layer also expects menus to be `.menu` elements with a `data-menu` attribute and hidden things to use the `hidden` attribute, because that's how I built Northbank and Meridian. I haven't tried it on a site built some other way yet.
+One honest caveat: the layer also expects menus to be `.menu` elements with a `data-menu` attribute and hidden things to use the `hidden` attribute, because that's how I built PeruBank and Meridian. I haven't tried it on a site built some other way yet.
 
 ## What I deliberately didn't use
 
@@ -135,7 +133,7 @@ One honest caveat: the layer also expects menus to be `.menu` elements with a `d
 
 ## What I'd do next
 
-- Scoped maps. `get_ui_map` dumps the whole site, which is about 20K characters on Northbank and 40K on Meridian. That's more than I'd like. The fix is to return the list of screens plus the current screen's elements, and let the agent fetch other screens on demand.
+- Scoped maps. `get_ui_map` dumps the whole site, which is about 20K characters on PeruBank and 40K on Meridian. That's more than I'd like. The fix is to return the list of screens plus the current screen's elements, and let the agent fetch other screens on demand.
 - `requestUserInteraction` once browsers ship it, so the browser does the waiting instead of the page.
 - Declarative tools for the two read-only tools, once ChatGPT's browser supports them.
 
@@ -144,8 +142,8 @@ One honest caveat: the layer also expects menus to be `.menu` elements with a `d
 ```
 showme.js           the WebMCP guide layer: map, tools, walkthrough, overlay, Agent activity drawer
 showme.css          the layer's styles, themed through --showme-* variables
-index.html          Northbank: accounts, transfers, cards, settings, transaction and confirmation dialogs, all with data-guide attributes
-app.js, styles.css  Northbank's data, rendering, hash routing and look
+index.html          PeruBank: accounts, transfers, cards, settings, transaction and confirmation dialogs, all with data-guide attributes
+app.js, styles.css  PeruBank's data, rendering, hash routing and look
 meridian/           Meridian: board, board settings, project settings, issue panel, dialogs, same conventions
 check.html          tells you whether the browser you're in exposes document.modelContext
 vendor/             Google's WebMCP polyfill (Apache-2.0); the test injects it, the pages never load it
@@ -158,7 +156,7 @@ test/walkthrough.mjs  Playwright walkthrough on both sites: four full guides, th
 - `run_walkthrough` returns `in_progress` after 40 seconds by default while the walkthrough keeps running on the page, so a runtime with a shorter tool timeout just calls it again. If yours cuts earlier, change the default in `showme.js`.
 - Why one call for the whole path: my first version did one spotlight per call, and in ChatGPT every round trip cost 10 to 20 seconds of model time, so the person sat there waiting between every click. Handing the whole plan to the page fixed that. The next spotlight appears the instant you finish the previous step.
 - The pages only ever talk to `document.modelContext`. `npm test` injects Google's polyfill into the test browser so the walkthrough runs on a stock Chrome.
-- Northbank and Meridian are fakes I built for this. Names, balances, issues and people are invented. Nothing leaves your browser.
+- PeruBank and Meridian are fakes I built for this. Names, balances, issues and people are invented. Nothing leaves your browser.
 - Opening the HTML files from disk shows a banner instead of the app, because browsers block ES modules on `file://`. Use `npm start` or the live URL.
 
 MIT © 2026 Sergio Huanca
