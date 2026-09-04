@@ -1,0 +1,62 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Plain settings</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/showme.css">
+<style>
+  body { font: 15px system-ui; margin: 0; }
+  header { display: flex; gap: 16px; align-items: center; padding: 12px 20px; background: #eee; position: relative; }
+  [role=menu]:not([hidden]) { position: absolute; top: 44px; right: 20px; background: #fff; border: 1px solid #ccc; padding: 6px; display: flex; flex-direction: column; }
+  main { padding: 20px; }
+  [role=tablist] { display: flex; gap: 8px; margin-bottom: 12px; }
+  [role=tab][aria-selected=true] { font-weight: bold; }
+  label { display: block; margin: 8px 0; }
+  [role=dialog] { position: fixed; inset: 30% 30%; background: #fff; border: 2px solid #333; padding: 20px; }
+</style>
+<header>
+  <a href="/">Home</a>
+  <a href="/meridian/">Tracker</a>
+  <button id="profile" aria-haspopup="menu" aria-controls="profile-menu" aria-expanded="false">Profile</button>
+  <div id="profile-menu" role="menu" hidden>
+    <button role="menuitem" id="mi-settings">Settings</button>
+    <button role="menuitem" id="mi-signout">Sign out</button>
+  </div>
+</header>
+<main>
+  <h1>Settings</h1>
+  <div role="tablist">
+    <button role="tab" id="tab-general" aria-controls="panel-general" aria-selected="true">General</button>
+    <button role="tab" id="tab-limits" aria-controls="panel-limits" aria-selected="false">Transfer limits</button>
+  </div>
+  <section id="panel-general" role="tabpanel" aria-labelledby="tab-general">
+    <label>Display name <input id="name" value="Sergio"></label>
+  </section>
+  <section id="panel-limits" role="tabpanel" aria-labelledby="tab-limits" hidden>
+    <label>Daily limit <input id="daily" value="2500"></label>
+    <button id="advanced" aria-expanded="false" aria-controls="advanced-box">Advanced</button>
+    <div id="advanced-box" hidden>
+      <label><input type="checkbox" id="intl"> International transfers</label>
+    </div>
+  </section>
+</main>
+<div id="confirm" role="dialog" aria-labelledby="confirm-title" hidden>
+  <h2 id="confirm-title">Confirm it is you</h2>
+  <label>Code <input id="code"></label>
+  <button id="cancel">Cancel</button>
+  <button id="ok" class="danger">Confirm</button>
+</div>
+<script type="module">
+  import { startGuide } from '/showme.js'
+  const $ = s => document.querySelector(s)
+  window.state = { international: 'off' }
+  $('#profile').onclick = () => { const m = $('#profile-menu'); m.hidden = !m.hidden; $('#profile').setAttribute('aria-expanded', String(!m.hidden)) }
+  $('#mi-settings').onclick = () => { $('#profile-menu').hidden = true; $('#tab-limits').click() }
+  for (const t of document.querySelectorAll('[role=tab]')) t.onclick = () => {
+    for (const x of document.querySelectorAll('[role=tab]')) { x.setAttribute('aria-selected', String(x === t)); document.getElementById(x.getAttribute('aria-controls')).hidden = x !== t }
+  }
+  $('#advanced').onclick = () => { const b = $('#advanced-box'); b.hidden = !b.hidden; $('#advanced').setAttribute('aria-expanded', String(!b.hidden)) }
+  $('#intl').onchange = () => { if ($('#intl').checked) $('#confirm').hidden = false }
+  $('#cancel').onclick = () => { $('#confirm').hidden = true; $('#intl').checked = false }
+  $('#ok').onclick = () => { $('#confirm').hidden = true; window.state.international = 'on' }
+  startGuide({ app: 'Plain', state: () => window.state, delegable: 'a[href], [role=tab], [role=menuitem], [aria-haspopup]', danger: '.danger' })
+</script>

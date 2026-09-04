@@ -281,6 +281,7 @@ startGuide({
   hint: 'How do I turn on international transfers?',
   also: { name: 'Meridian, a team tracker', url: 'meridian/' },
   neutral: '#agent-activity-btn',
+  auto: false,
   state: () => ({
     balances: Object.fromEntries(Object.values(accounts).map(a => [`${a.name} ••••${a.num}`, money(a.balance)])),
     international_transfers: state.international ? 'on' : 'off',

@@ -5,78 +5,187 @@ let listedNames = null
 const stats = { toolchange: 0 }
 const shownAt = new Map()
 const lastAction = new Map()
-let app = { app: 'this app', state: () => ({}) }
+let app = { app: 'this app', state: () => ({}), auto: true }
 let walk = null
 let pending = null
 let ui, spot, caption, cursor, drawer
 
 const HOW = [
   'You are guiding a person who wants to learn where things are. You show, they click.',
-  'Plan the whole path from the current screen with the ids below, then call run_walkthrough once with every step. Elements with inside_menu need that menu opened in an earlier step. Screens are reached through elements whose "opens" names the screen. Collapsed sections and dialogs need their opener as an earlier step.',
+  'Plan the whole path from the current screen with the ids below, then call run_walkthrough once with every step. An element that is not visible says where it is and, in open_first, which element to click first; put that click in an earlier step. Screens are reached through elements whose "opens" names the screen.',
   'The page paces the person: each spotlight appears the instant they finish the previous step, so do not split the path into several calls.',
-  'If run_walkthrough returns in_progress, call it again without steps to keep waiting. If it returns interrupted or blocked, read the reason and now, then call it again with the remaining steps.',
+  'If run_walkthrough returns in_progress, the guide is still running on the page without you. Reply to the person: tell them to follow the spotlight and to tell you when they are done. Do not call run_walkthrough again in a loop. When they say they are done, call it once without steps to get the result.',
+  'Wrong clicks are handled on the page: it nudges the person, and if they leave the screen it rewinds to the last step they can still see. You only get interrupted or blocked when the path is truly lost. Then read reason and now, and call run_walkthrough again with steps that start from an element in now.visible_elements.',
   'Only call do_step_for_person when the person explicitly asks you to do a step for them. Most steps are theirs by policy and the tool will say so.',
   'When the walkthrough is completed, tell the person the path in one line so they remember it next time, and call end_walkthrough.',
 ]
 
-const q = id => document.querySelector(`[data-guide="${CSS.escape(id)}"]`)
+function q(id) {
+  const el = document.querySelector(`[data-guide="${CSS.escape(id)}"]`)
+  if (el || !app.auto) return el
+  let a = autoIds.get(id)
+  if (!a || !a.isConnected) { autoScan(); a = autoIds.get(id) }
+  return a || null
+}
 const visible = el => !!el && el.getClientRects().length > 0
 const sleep = ms => new Promise(r => setTimeout(r, ms))
-const desc = el => el.dataset.guideDesc || el.textContent.trim()
+const desc = el => el.dataset.guideDesc || accName(el)
+const idOf = el => el ? el.dataset.guide || autoIdOf.get(el) || null : null
+const delegable = el => 'guideDelegable' in el.dataset || !!(app.delegable && el.matches(app.delegable))
+const danger = el => 'guideDanger' in el.dataset || !!(app.danger && el.matches(app.danger))
+const slug = t => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40)
+const DIALOGS = '[data-dialog], dialog, [role=dialog], [role=alertdialog]'
+const INTERACTIVE = 'a[href], button, input:not([type=hidden]), select, textarea, summary, [role=button], [role=tab], [role=menuitem], [role=menuitemcheckbox], [role=menuitemradio], [role=option], [role=switch], [role=checkbox], [role=link]'
+let autoIds = new Map(), autoIdOf = new Map()
+
+function accName(el) {
+  const by = el.getAttribute('aria-labelledby')
+  if (by) {
+    const t = by.split(/\s+/).map(i => document.getElementById(i)?.textContent.trim()).filter(Boolean).join(' ')
+    if (t) return t
+  }
+  const al = el.getAttribute('aria-label')
+  if (al && al.trim()) return al.trim()
+  if (el.matches('input, select, textarea')) {
+    const lab = (el.id && document.querySelector(`label[for="${CSS.escape(el.id)}"]`)) || el.closest('label')
+    const t = lab && lab.textContent.trim().replace(/\s+/g, ' ')
+    if (t) return t
+    if (el.placeholder) return el.placeholder
+  }
+  const t = (el.matches('input[type=submit], input[type=button]') ? el.value : el.textContent).trim().replace(/\s+/g, ' ')
+  return t || el.title || el.getAttribute('alt') || el.querySelector('img[alt]')?.alt || ''
+}
+
+function autoScan() {
+  autoIds = new Map(); autoIdOf = new Map()
+  if (!app.auto) return
+  const seen = new Map()
+  for (const el of document.querySelectorAll(INTERACTIVE)) {
+    if (el.disabled || el.closest('[data-guide], #showme, .agent-drawer')) continue
+    const name = accName(el)
+    if (!name || name.length > 120) continue
+    if (!visible(el) && !containerOf(el)) continue
+    let id = kind(el).replace(/ /g, '-') + ':' + slug(name)
+    const n = (seen.get(id) || 0) + 1
+    seen.set(id, n)
+    if (n > 1) id += '-' + n
+    autoIds.set(id, el)
+    autoIdOf.set(el, id)
+  }
+}
+
+function guidedNodes(root) {
+  autoScan()
+  return [...root.querySelectorAll('[data-guide]'), ...[...autoIds.values()].filter(el => el !== root && root.contains(el))]
+}
+
+function openerOf(n) {
+  if (n.id) {
+    const o = document.querySelector(`[aria-controls~="${CSS.escape(n.id)}"], [popovertarget="${CSS.escape(n.id)}"]`)
+    if (o) return o
+  }
+  const by = n.getAttribute('aria-labelledby')
+  const tab = by && document.getElementById(by.split(/\s+/)[0])
+  return tab && tab.matches('[role=tab]') ? tab : null
+}
+
+function containerOf(el) {
+  for (let n = el.parentElement; n && n !== document.body; n = n.parentElement) {
+    if (n.matches('details') && !n.open && !el.closest('summary')) {
+      const sum = n.querySelector(':scope > summary')
+      return { where: `in the collapsed "${sum ? accName(sum) : 'section'}" section`, opener: idOf(sum) }
+    }
+    if (visible(n)) continue
+    if (n.dataset.menu) return { where: 'in a menu', opener: n.dataset.menu }
+    if (n.matches('[role=menu]')) return { where: 'in a menu', opener: idOf(openerOf(n)) }
+    if (n.dataset.dialog !== undefined) return { where: `in the "${n.dataset.dialog}" dialog`, opener: idOf(openerOf(n)) }
+    if (n.matches('dialog, [role=dialog], [role=alertdialog]')) return { where: `in the "${accName(n) || 'dialog'}" dialog`, opener: idOf(openerOf(n)) }
+    if (n.dataset.panel) return { where: `in the "${n.dataset.panel}" panel`, opener: idOf(openerOf(n)) }
+    if (n.matches('[role=tabpanel]')) return { where: `in the "${accName(n)}" tab`, opener: idOf(openerOf(n)) }
+    if (n.dataset.region) return { where: `in the ${n.dataset.region}`, opener: n.dataset.regionOpener }
+    if (n.dataset.screen) {
+      const g = document.querySelector(`[data-guide-goto="${CSS.escape(n.dataset.screen)}"]`)
+      return { where: `on the "${n.dataset.screen}" screen`, opener: g ? g.dataset.guide : null }
+    }
+    const t = openerOf(n)
+    if (t) return { where: `in the collapsed "${accName(t)}" section`, opener: idOf(t) }
+  }
+  return null
+}
+
+const dialogId = d => d.dataset.dialog !== undefined ? d.dataset.dialog : d.id || slug(accName(d)) || 'dialog'
 
 function kind(el) {
   const t = el.tagName.toLowerCase()
-  if (t === 'input') return el.type === 'checkbox' ? 'checkbox' : el.type === 'search' ? 'search box' : 'text field'
+  if (t === 'input') return el.type === 'checkbox' || el.type === 'radio' ? 'checkbox' : el.type === 'search' ? 'search box' : 'text field'
   if (t === 'select') return 'dropdown'
   if (t === 'textarea') return 'text field'
-  if (el.closest('[data-menu]')) return 'menu item'
+  if (t === 'summary') return 'section header'
+  if (el.closest('[data-menu], [role=menu]')) return 'menu item'
+  if (el.matches('[role=tab]')) return 'tab'
   if (t === 'a') return el.classList.contains('tab') ? 'tab' : 'link'
   return 'button'
 }
 
 function describe(el) {
-  const d = { id: el.dataset.guide, what: desc(el), kind: kind(el), visible: visible(el) }
+  const d = { id: idOf(el), what: desc(el), kind: kind(el), visible: visible(el) }
   if (el.dataset.guideGoto) d.opens = el.dataset.guideGoto
+  else if (!el.dataset.guide && el.matches('a[href]') && !/^#?$/.test(el.getAttribute('href'))) {
+    const u = new URL(el.href, location.href)
+    if (u.origin === location.origin && u.pathname + u.hash !== location.pathname + location.hash) d.opens = u.pathname + u.hash
+  }
   if (el.dataset.guideMenu) d.inside_menu = el.dataset.guideMenu
   const panel = el.closest('[data-panel]')
   if (panel) d.panel = panel.dataset.panel
   const dialog = el.closest('[data-dialog]')
   if (dialog) d.inside_dialog = dialog.dataset.dialog
-  if ('guideDelegable' in el.dataset) d.agent_may_do_this = true
-  if ('guideDanger' in el.dataset) d.irreversible = true
+  if (!d.visible) {
+    const c = containerOf(el)
+    if (c) { d.where = c.where; if (c.opener) d.open_first = c.opener }
+  }
+  if (delegable(el)) d.agent_may_do_this = true
+  if (danger(el)) d.irreversible = true
   return d
 }
 
 function uiMap() {
-  const screens = [...document.querySelectorAll('[data-screen]')].map(s => ({
+  const screenNodes = [...document.querySelectorAll('[data-screen]')]
+  const dialogNodes = [...document.querySelectorAll(DIALOGS)].filter(d => d.dataset.dialog !== undefined || !d.parentElement.closest(DIALOGS))
+  const screens = screenNodes.length ? screenNodes.map(s => ({
     id: s.dataset.screen,
     title: s.querySelector('h1')?.textContent.trim() || s.dataset.screen,
     what: s.dataset.screenDesc,
     current: visible(s),
     panels: [...s.querySelectorAll('[data-panel]')].map(p => ({ id: p.dataset.panel, what: p.dataset.panelDesc, current: visible(p) })),
-    elements: [...s.querySelectorAll('[data-guide]')].map(describe),
-  }))
-  const dialogs = [...document.querySelectorAll('[data-dialog]')].map(d => ({
-    id: d.dataset.dialog,
-    what: d.dataset.dialogDesc,
+    elements: guidedNodes(s).map(describe),
+  })) : [{
+    id: location.pathname + location.hash,
+    title: document.querySelector('h1')?.textContent.trim() || document.title,
+    current: true,
+    elements: guidedNodes(document.body).filter(el => !el.closest(DIALOGS)).map(describe),
+  }]
+  const dialogs = dialogNodes.map(d => ({
+    id: dialogId(d),
+    what: d.dataset.dialogDesc || (d.dataset.dialog === undefined ? accName(d) : undefined),
     open: visible(d),
-    elements: [...d.querySelectorAll('[data-guide]')].map(describe),
+    elements: guidedNodes(d).map(describe),
   }))
-  const global = [...document.querySelectorAll('[data-guide]')].filter(el => !el.closest('[data-screen]') && !el.closest('[data-dialog]')).map(describe)
+  const global = screenNodes.length ? guidedNodes(document.body).filter(el => !el.closest('[data-screen]') && !el.closest(DIALOGS)).map(describe) : []
   return { app: app.app, how_to_guide: HOW, screens, dialogs, always_available: global }
 }
 
 function view() {
+  const hasScreens = !!document.querySelector('[data-screen]')
   const s = [...document.querySelectorAll('[data-screen]')].find(visible)
   const p = s && [...s.querySelectorAll('[data-panel]')].find(visible)
-  const menu = [...document.querySelectorAll('[data-menu]')].find(visible)
-  const dialog = [...document.querySelectorAll('[data-dialog]')].find(visible)
+  const menu = [...document.querySelectorAll('[data-menu], [role=menu]')].find(visible)
+  const dialog = [...document.querySelectorAll(DIALOGS)].find(visible)
   return {
-    screen: s ? { id: s.dataset.screen, title: s.querySelector('h1')?.textContent.trim() } : null,
+    screen: s ? { id: s.dataset.screen, title: s.querySelector('h1')?.textContent.trim() } : hasScreens ? null : { id: location.pathname + location.hash, title: document.querySelector('h1')?.textContent.trim() || document.title },
     panel: p ? p.dataset.panel : null,
-    open_menu: menu ? menu.dataset.menu : null,
-    open_dialog: dialog ? dialog.dataset.dialog : null,
-    visible_elements: [...document.querySelectorAll('[data-guide]')].filter(visible).map(e => e.dataset.guide),
+    open_menu: menu ? menu.dataset.menu || idOf(openerOf(menu)) || accName(menu) || 'menu' : null,
+    open_dialog: dialog ? dialogId(dialog) : null,
+    visible_elements: guidedNodes(document.body).filter(visible).map(idOf),
     walkthrough: walk ? { active: true, step: walk.step, highlighted: walk.target } : { active: false },
     app_state: app.state(),
   }
@@ -99,13 +208,17 @@ function whyHidden(el) {
   let box = el
   while (box.parentElement && !visible(box.parentElement)) box = box.parentElement
   const toggle = box.previousElementSibling
-  if (toggle && toggle.dataset.guide) return `"${id}" is inside the collapsed "${toggle.textContent.trim()}" section. Guide the person to click "${toggle.dataset.guide}" first.`
+  if (toggle && idOf(toggle)) return `"${id}" is inside the collapsed "${toggle.textContent.trim()}" section. Guide the person to click "${idOf(toggle)}" first.`
+  const c = containerOf(el)
+  if (c) return `"${id}" is ${c.where}, which is not open. ${c.opener ? `Guide the person to click "${c.opener}" first.` : 'It opens after another action on this screen.'}`
   return `"${id}" exists but is not visible right now. It probably appears after another action on this screen, such as a button that reveals a form.`
 }
 
 function whatWasClicked(node) {
   const g = node.closest && node.closest('[data-guide]')
   if (g) return `"${g.dataset.guide}" (${desc(g)})`
+  const a = node.closest && node.closest(INTERACTIVE)
+  if (a && idOf(a)) return `"${idOf(a)}" (${desc(a)})`
   const s = node.closest && node.closest('[data-screen]')
   return s ? `an unmarked area of the ${s.dataset.screen} screen` : 'an unmarked area of the page'
 }
@@ -245,10 +358,11 @@ function waitFor({ element_id, timeout_seconds }, ctx) {
       if (el.value.trim()) debounce = setTimeout(() => done(`typed "${el.value.trim()}"`), 900)
     }
     const onDown = e => {
+      if (e.button) return
       const label = e.target.closest && e.target.closest('label')
       const neutral = app.neutral && e.target.closest && e.target.closest(app.neutral)
       const inside = el.contains(e.target) || (label && label.contains(el)) || ui.contains(e.target) || drawer.contains(e.target) || neutral
-      if (!inside) fail('The person clicked somewhere else: ' + whatWasClicked(e.target))
+      if (!inside) nudge(whatWasClicked(e.target))
     }
     const onAbort = () => finish({ done: false, reason: 'cancelled by the agent' })
     function cleanup() {
@@ -281,6 +395,16 @@ function waitFor({ element_id, timeout_seconds }, ctx) {
   })
 }
 
+function nudge(what) {
+  const run = walk && walk.run
+  if (run) { run.detours.push({ step: run.index + 1, clicked: what }); run.lastClicked = what }
+  caption.querySelector('.hint').textContent = 'Not that one. This one.'
+  spot.classList.remove('nudge')
+  void spot.offsetWidth
+  spot.classList.add('nudge')
+  logEvent(`You clicked ${what}. The guide kept waiting.`)
+}
+
 async function moveCursor(el) {
   const r = el.getBoundingClientRect()
   cursor.classList.add('on')
@@ -296,8 +420,8 @@ async function moveCursor(el) {
 async function doStep({ element_id, value }) {
   const el = q(element_id)
   if (!el) return { ok: false, error: `No element with id "${element_id}". Call get_ui_map to see the ids.` }
-  if ('guideDanger' in el.dataset) return { ok: false, refused: true, reason: `${app.app} policy: "${desc(el)}" is irreversible and is never done by an agent. Guide the person with run_walkthrough instead.` }
-  if (!('guideDelegable' in el.dataset)) return { ok: false, refused: true, reason: `${app.app} policy: "${desc(el)}" is a change the person makes themselves. Agents may only navigate and type into search boxes here. Guide them with run_walkthrough instead.` }
+  if (danger(el)) return { ok: false, refused: true, reason: `${app.app} policy: "${desc(el)}" is irreversible and is never done by an agent. Guide the person with run_walkthrough instead.` }
+  if (!delegable(el)) return { ok: false, refused: true, reason: `${app.app} policy: "${desc(el)}" is a change the person makes themselves. Agents may only navigate and type into search boxes here. Guide them with run_walkthrough instead.` }
   if (!visible(el)) return { ok: false, error: whyHidden(el) }
   el.scrollIntoView({ block: 'center', behavior: 'smooth' })
   await moveCursor(el)
@@ -365,20 +489,41 @@ function stopRun(reason) {
   }
 }
 
+const rewindIndex = run => {
+  for (let i = run.index - 1; i >= 0; i--) if (visible(q(run.steps[i].element_id))) return i
+  return -1
+}
+
 async function drive(run) {
+  let back = false
   while (run.index < run.steps.length && run.status === 'in_progress') {
     const step = run.steps[run.index]
     const el = q(step.element_id)
     if (!el) { finishRun(run, 'blocked', `No element with id "${step.element_id}" exists right now. Call get_ui_map to see the ids.`); return }
-    const ready = run.index === 0 ? visible(el) : await untilVisible(el, 6000)
+    const ready = run.index === 0 && !back ? visible(el) : await untilVisible(el, back ? 1500 : 6000)
     if (run.status !== 'in_progress') return
-    if (!ready) { finishRun(run, 'blocked', whyHidden(el)); return }
-    await highlight({ element_id: step.element_id, message: step.message })
+    if (!ready) {
+      const i = back && run.detours.length < 12 ? rewindIndex(run) : -1
+      if (i < 0) {
+        finishRun(run, back ? 'interrupted' : 'blocked', back ? `The person left the path${run.lastClicked ? ' by clicking ' + run.lastClicked : ''} and none of the earlier steps is visible now.` : whyHidden(el))
+        return
+      }
+      run.detours.push({ step: run.index + 1, clicked: run.lastClicked || null, rewound_to: i + 1 })
+      logEvent(`You left the path at step ${run.index + 1}. The guide went back to step ${i + 1}.`)
+      run.index = i
+      continue
+    }
+    await highlight({ element_id: step.element_id, message: (back ? 'Back on track. ' : '') + step.message })
+    back = false
     let r
     do { r = await waitFor({ element_id: step.element_id, timeout_seconds: 600 }, {}) }
     while (r.done === false && r.reason === 'still waiting' && run.status === 'in_progress')
     if (run.status !== 'in_progress') return
-    if (!r.done) { finishRun(run, 'interrupted', r.reason); return }
+    if (!r.done) {
+      if (/disappeared/.test(r.reason)) { back = true; continue }
+      finishRun(run, 'interrupted', r.reason)
+      return
+    }
     run.results.push({ element_id: step.element_id, action: r.action })
     run.index++
     await sleep(350)
@@ -387,10 +532,10 @@ async function drive(run) {
 }
 
 const NEXT = {
-  in_progress: 'The walkthrough keeps running on the page. Call run_walkthrough again without steps to keep waiting.',
+  in_progress: 'The walkthrough keeps running on the page without you. Reply to the person now: tell them to follow the spotlight and to tell you when they are done. Do not call run_walkthrough again in a loop; call it once without steps when they say they are done.',
   completed: 'Tell the person the path in one line and call end_walkthrough.',
-  interrupted: 'Read reason and now, then call run_walkthrough with the remaining steps. Re-plan if the person went somewhere else.',
-  blocked: 'That step was not reachable when its turn came. Check now.visible_elements and call run_walkthrough with a corrected plan.',
+  interrupted: 'The path was lost. Read reason and now. If the person wants to continue, call run_walkthrough again with steps that start from an element in now.visible_elements.',
+  blocked: 'That step was not reachable when its turn came. Check now.visible_elements and call run_walkthrough with a corrected plan that starts from a visible element.',
 }
 
 function report(run) {
@@ -398,6 +543,7 @@ function report(run) {
     status: run.status,
     steps_total: run.steps.length,
     completed_steps: run.results,
+    detours: run.detours,
     current_step: run.status === 'in_progress' ? { number: run.index + 1, ...run.steps[run.index] } : null,
     reason: run.reason || undefined,
     learned_path: run.learned_path,
@@ -415,7 +561,7 @@ async function runWalkthrough({ steps, title, timeout_seconds }, ctx = {}) {
     if (!walk) startWalk()
     walk.step = 0
     walk.total = steps.length
-    walk.run = { title: title || '', steps: steps.map(x => ({ element_id: x.element_id, message: x.message || '' })), index: 0, results: [], status: 'in_progress', reason: null, waiters: [] }
+    walk.run = { title: title || '', steps: steps.map(x => ({ element_id: x.element_id, message: x.message || '' })), index: 0, results: [], detours: [], lastClicked: null, status: 'in_progress', reason: null, waiters: [] }
     drive(walk.run)
   } else if (!walk || !walk.run) {
     return { ok: false, error: 'No walkthrough is running. Pass steps to start one.' }
@@ -451,7 +597,7 @@ const baseTools = () => [
   },
   {
     name: 'run_walkthrough',
-    description: 'Guide the person through a whole path. Pass every step in order. The page spotlights each element with your message, waits for the person to click, tick or type, then moves to the next step by itself, so they never wait for you between steps. Returns completed, interrupted (with the reason: they clicked elsewhere or stopped), blocked (a step was not reachable when its turn came), or in_progress after timeout_seconds (default 40) while it keeps running; call again without steps to keep waiting.',
+    description: 'Guide the person through a whole path. Pass every step in order. The page spotlights each element with your message, waits for the person to click, tick or type, then moves to the next step by itself; wrong clicks are handled on the page. Returns completed, interrupted (they stopped or got lost), blocked (a step was not reachable when its turn came), or in_progress after timeout_seconds (default 40) while it keeps running.',
     inputSchema: objSchema({
       steps: {
         type: 'array',
@@ -542,7 +688,7 @@ function buildOverlay() {
   ui = document.createElement('div')
   ui.id = 'showme'
   ui.innerHTML = `<div class="showme-spot" hidden></div>
-<div class="showme-caption" hidden><span class="step"></span><button class="stop" title="Stop the guide"><svg><use href="#i-x"/></svg></button><div class="text"></div><span class="hint"></span></div>
+<div class="showme-caption" hidden><span class="step"></span><button class="stop" title="Stop the guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="text"></div><span class="hint"></span></div>
 <svg class="showme-cursor" viewBox="0 0 24 24"><path d="M5 3l14 8-6.5 1.6L9 19z" fill="#fff" stroke="#172b4d" stroke-width="1.6" stroke-linejoin="round"/></svg>`
   document.body.appendChild(ui)
   spot = ui.querySelector('.showme-spot')
@@ -566,7 +712,7 @@ function buildDrawer() {
   drawer = document.createElement('aside')
   drawer.className = 'agent-drawer'
   drawer.hidden = true
-  drawer.innerHTML = `<header><span class="dot"></span>Agent activity<button class="icon-btn" title="Close"><svg><use href="#i-x"/></svg></button></header>
+  drawer.innerHTML = `<header><span class="dot"></span>Agent activity<button class="icon-btn" title="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
 <div class="api"></div>
 <h3>WebMCP in this session</h3>
 <ul class="score"></ul>
@@ -675,7 +821,7 @@ function headline(c) {
       if (!o) return [head, null]
       if (o.ok === false) return [head, `${site} answered: ${o.error}`]
       const tail = {
-        completed: `completed, you did all ${o.steps_total} steps yourself`,
+        completed: `completed, you did all ${o.steps_total} steps yourself${o.detours && o.detours.length ? `, ${o.detours.length} detour${o.detours.length === 1 ? '' : 's'} handled on the page` : ''}`,
         interrupted: `interrupted after ${o.completed_steps.length} of ${o.steps_total} steps. ${o.reason}`,
         blocked: `blocked. ${o.reason}`,
         in_progress: `still running after ${o.completed_steps.length} of ${o.steps_total} steps, the agent calls again`,
