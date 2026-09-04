@@ -352,7 +352,7 @@ function waitFor({ element_id, timeout_seconds }, ctx) {
     const fail = reason => later({ done: false, reason }, clearSpot)
     const onClick = () => done('clicked')
     const onChange = () => done(el.type === 'checkbox' ? (el.checked ? 'checked' : 'unchecked') : `chose "${el.value}"`)
-    const onKey = e => { if (e.key === 'Enter' && el.value.trim()) done(`typed "${el.value.trim()}"`) }
+    const onKey = e => { if (e.key === 'Enter' && el.value.trim()) done(`typed "${el.value.trim()}" and pressed Enter`) }
     const onInput = () => {
       clearTimeout(debounce)
       if (el.value.trim()) debounce = setTimeout(() => done(`typed "${el.value.trim()}"`), 900)
@@ -504,6 +504,13 @@ async function drive(run) {
     const step = run.steps[run.index]
     const el = q(step.element_id)
     if (!el) { finishRun(run, 'blocked', `No element with id "${step.element_id}" exists right now. Call get_ui_map to see the ids.`); return }
+    const prev = run.results[run.index - 1]
+    const prevEl = !back && prev && /pressed Enter$/.test(prev.action) && q(prev.element_id)
+    if (prevEl && prevEl.form && prevEl.form === el.form && !visible(el)) {
+      run.results.push({ element_id: step.element_id, action: 'submitted with Enter' })
+      run.index++
+      continue
+    }
     const ready = run.index === 0 && !back ? visible(el) : await untilVisible(el, back ? 1500 : 6000)
     if (run.status !== 'in_progress') return
     if (!ready) {

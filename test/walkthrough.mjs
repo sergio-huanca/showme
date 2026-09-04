@@ -280,16 +280,16 @@ try {
   await act('settings.tab.limits', () => click('settings.tab.limits'))
   await act('settings.limits.advanced', () => click('settings.limits.advanced'))
   await act('settings.limits.international', () => page.click('label:has([data-guide="settings.limits.international"])'))
-  await act('confirm.code', () => page.type(sel('confirm.code'), '482913', { delay: 40 }))
-  await act('confirm.confirm', async () => {
+  await act('confirm.code', async () => {
     const refused = await run('do_step_for_person', { element_id: 'confirm.confirm' })
     assert.equal(refused.refused, true)
     assert.match(refused.reason, /PeruBank policy.*irreversible/)
     await shot('bank-confirm')
-    await click('confirm.confirm')
+    await typeEnter('confirm.code', '482913')
   })
   r = await running
   assert.equal(r.status, 'completed')
+  assert.equal(r.completed_steps[6].action, 'submitted with Enter', 'Enter in the code field counts as the Confirm step')
   assert.equal(r.now.app_state.international_transfers, 'on')
   assert.equal(r.now.open_dialog, null)
   assert.deepEqual(r.learned_path, ['Profile menu', 'Settings', 'Transfer limits', 'Advanced', 'International transfers', 'Code', 'Confirm'])
