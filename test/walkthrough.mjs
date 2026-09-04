@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdir } from 'node:fs/promises'
+import { mkdir, rm } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
@@ -7,6 +7,7 @@ import { serve } from '../serve.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const shots = join(root, 'test', 'shots')
+await rm(shots, { recursive: true, force: true })
 await mkdir(shots, { recursive: true })
 const { server, port } = await serve(root)
 const browser = await chromium.launch({ channel: 'chrome', headless: !process.env.HEADED })
