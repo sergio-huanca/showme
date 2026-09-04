@@ -1,6 +1,7 @@
-/* ShowMe guide layer: spotlight overlay, caption, cursor and the Agent activity drawer.
-   Theme it by overriding the --showme-* variables in your own stylesheet. */
-/* Defaults live as fallbacks below. Override any --showme-* variable on your page's :root; the overlay is in a shadow root, so nothing else of yours reaches it. */
+/* ShowMe guide layer: spotlight, caption, cursor, first-visit card and the Agent activity panel.
+   Loaded by showme.js into a shadow root, so your CSS never reaches it and it never reaches your page.
+   Theme it by setting the --showme-* variables on your page's :root; the defaults are the fallbacks below. */
+*, *::before, *::after { box-sizing: border-box; }
 
 .showme-spot { position: fixed; border-radius: 8px; pointer-events: none; z-index: 9000; box-shadow: 0 0 0 3px var(--showme-accent, #0c66e4), 0 0 0 100vmax rgba(9,30,66,.6); transition: top .35s ease, left .35s ease, width .35s ease, height .35s ease; }
 .showme-spot::after { content: ""; position: absolute; inset: -3px; border-radius: 10px; border: 3px solid var(--showme-accent, #0c66e4); animation: showme-pulse 1.4s ease-out infinite; }
