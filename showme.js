@@ -8,7 +8,7 @@ const lastAction = new Map()
 let app = { app: 'this app', state: () => ({}), auto: true }
 let walk = null
 let pending = null
-let ui, spot, caption, cursor, drawer
+let ui, root, spot, caption, cursor, drawer
 
 const HOW = [
   'You are guiding a person who wants to learn where things are. You show, they click.',
@@ -61,7 +61,7 @@ function autoScan() {
   if (!app.auto) return
   const seen = new Map()
   for (const el of document.querySelectorAll(INTERACTIVE)) {
-    if (el.disabled || el.closest('[data-guide], #showme, .agent-drawer')) continue
+    if (el.disabled || el.closest('[data-guide]')) continue
     const name = accName(el)
     if (!name || name.length > 120) continue
     if (!visible(el) && !containerOf(el)) continue
@@ -692,13 +692,15 @@ async function register(def, opts = {}) {
 function buildOverlay() {
   ui = document.createElement('div')
   ui.id = 'showme'
-  ui.innerHTML = `<div class="showme-spot" hidden></div>
+  root = ui.attachShadow({ mode: 'open' })
+  root.innerHTML = `<link rel="stylesheet" href="${new URL('./showme.css', import.meta.url)}">
+<div class="showme-spot" hidden></div>
 <div class="showme-caption" hidden><span class="step"></span><button class="stop" title="Stop the guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="text"></div><span class="hint"></span></div>
 <svg class="showme-cursor" viewBox="0 0 24 24"><path d="M5 3l14 8-6.5 1.6L9 19z" fill="#fff" stroke="#172b4d" stroke-width="1.6" stroke-linejoin="round"/></svg>`
   document.body.appendChild(ui)
-  spot = ui.querySelector('.showme-spot')
-  caption = ui.querySelector('.showme-caption')
-  cursor = ui.querySelector('.showme-cursor')
+  spot = root.querySelector('.showme-spot')
+  caption = root.querySelector('.showme-caption')
+  cursor = root.querySelector('.showme-cursor')
   caption.querySelector('.stop').addEventListener('click', () => endWalk('stopped by the person'))
 }
 
@@ -710,7 +712,7 @@ function buildRibbon() {
   r.className = 'showme-ribbon'
   r.innerHTML = `<b>Agent-ready site.</b> Open it in ChatGPT's browser, or Chrome with WebMCP, and ask: <q>${esc(app.hint)}</q>${app.also ? ` · Also try <a href="${esc(app.also.url)}">${esc(app.also.name)}</a>` : ''}<button class="close" title="Dismiss">×</button>`
   r.querySelector('.close').addEventListener('click', () => { r.remove(); try { localStorage.setItem(key, '1') } catch {} })
-  ui.appendChild(r)
+  root.appendChild(r)
 }
 
 function buildDrawer() {
@@ -731,7 +733,7 @@ function buildDrawer() {
 <details class="mapdump"><summary>Show exactly what get_ui_map returns</summary><pre></pre></details>`
   drawer.querySelector('header .icon-btn').addEventListener('click', () => { drawer.hidden = true; document.body.classList.remove('drawer-open') })
   drawer.querySelector('.mapdump').addEventListener('toggle', e => { if (e.target.open) e.target.querySelector('pre').textContent = JSON.stringify(uiMap(), null, 2) })
-  document.body.appendChild(drawer)
+  root.appendChild(drawer)
 }
 
 const tagFor = t => {
@@ -907,6 +909,7 @@ export async function startGuide(opts) {
   const accepted = [...new Set([...registry.values()].flatMap(t => t.accepted || []))]
   logEvent(m ? `Registered ${registry.size} tools with document.modelContext.registerTool${accepted.length ? ' · annotations accepted: ' + accepted.join(', ') : ''}` : 'document.modelContext is not available in this browser: tools are only reachable from this page')
   window.showme = {
+    root,
     state: () => ({ target: walk ? walk.target : null, step: walk ? walk.step : 0, run: walk && walk.run ? { index: walk.run.index, status: walk.run.status } : null }),
   }
 }

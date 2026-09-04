@@ -87,7 +87,7 @@ try {
   await page.waitForTimeout(700)
   assert.equal(await page.locator('.agent-drawer .tools li').count(), 5)
   const aligned = await page.evaluate(() => {
-    const spot = document.querySelector('.showme-spot')
+    const spot = window.showme.root.querySelector('.showme-spot')
     const r = document.querySelector('[data-guide="boardsettings.tab.columns"]').getBoundingClientRect()
     return !spot.hidden && Math.abs(parseFloat(spot.style.left) - (r.left - 6)) < 2 && Math.abs(parseFloat(spot.style.top) - (r.top - 6)) < 2
   })
@@ -99,7 +99,7 @@ try {
   await act('boardsettings.columns.add', () => click('boardsettings.columns.add'))
   await act('boardsettings.columns.name', () => page.type(sel('boardsettings.columns.name'), 'Code Review', { delay: 40 }))
   await act('boardsettings.columns.create', () => page.click('[data-screen="board-settings"] h1'))
-  await page.waitForFunction(() => document.querySelector('.showme-caption .hint').textContent.includes('Not that one'))
+  await page.waitForFunction(() => window.showme.root.querySelector('.showme-caption .hint').textContent.includes('Not that one'))
   assert.equal((await page.evaluate(() => window.showme.state())).run.status, 'in_progress', 'a wrong click on the same screen does not end the walkthrough')
   await shot('clicked-elsewhere')
   await click('boardsettings.columns.create')
@@ -115,7 +115,7 @@ try {
   const mapAfter = Number(/(\d+) elements/.exec(await page.textContent('.agent-drawer .map'))[1])
   assert.ok(mapAfter > mapBefore, `map grew after adding a column (${mapBefore} -> ${mapAfter})`)
   await page.click('.agent-drawer .mapdump summary')
-  await page.waitForFunction(() => document.querySelector('.agent-drawer .mapdump pre').textContent.length > 100)
+  await page.waitForFunction(() => window.showme.root.querySelector('.agent-drawer .mapdump pre').textContent.length > 100)
   assert.match(await page.textContent('.agent-drawer .mapdump pre'), /"board\.more"/)
   await page.click('.agent-drawer .mapdump summary')
   await shot('column-added')
@@ -207,7 +207,7 @@ try {
   await shot('board-after-issue')
 
   await page.setViewportSize({ width: 820, height: 900 })
-  const drawerOpen = () => page.evaluate(() => !document.querySelector('.agent-drawer').hidden)
+  const drawerOpen = () => page.evaluate(() => !window.showme.root.querySelector('.agent-drawer').hidden)
   const setDrawer = async open => { if ((await drawerOpen()) !== open) await page.click('#agent-activity-btn') }
   await setDrawer(false)
   await page.goto(`http://localhost:${port}/meridian/#board`)

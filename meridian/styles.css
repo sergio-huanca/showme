@@ -222,7 +222,10 @@ h2 { font-size: 18px; margin: 0 0 8px; }
 .chips .chip button { font-size: 12px; line-height: 1; padding: 0 2px; color: var(--muted); }
 .chips .chip button:hover { color: var(--danger); }
 
+body.drawer-open .modal-backdrop { right: 376px; }
+
 @media (max-width: 1180px) {
+  body.drawer-open .modal-backdrop { right: 356px; }
   .menu-btn { display: inline-flex; }
   .sidebar { display: none; position: fixed; top: var(--top); left: 0; bottom: 0; z-index: 45; background: #fff; box-shadow: 8px 0 24px rgba(9,30,66,.15); }
   body.sidebar-open .sidebar { display: flex; }

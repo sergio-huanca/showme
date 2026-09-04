@@ -59,10 +59,9 @@ npm test           # Playwright drives both sites through document.modelContext 
 
 ## Adding it to your site
 
-Two lines, and your page is mapped from the markup it already has:
+One script tag, and your page is mapped from the markup it already has:
 
 ```html
-<link rel="stylesheet" href="showme.css">
 <script type="module">
   import { startGuide } from './showme.js'
   startGuide({ app: 'Your app' })
@@ -96,11 +95,11 @@ Then attributes, only where the automatic sentence isn't good enough. Usually th
 - `data-guide-goto="screen-id"` says where a click leads, `data-guide-menu="opener-id"` says the element lives inside a menu.
 - `data-screen`, `data-panel`, `data-dialog` and `data-menu` group elements when your markup doesn't use ARIA roles for that.
 
-PeruBank and Meridian are annotated by hand end to end, with `auto` turned off, because I wanted every sentence in them to be one a person wrote. A real site would start with the two lines and add sentences where the tickets are.
+PeruBank and Meridian are annotated by hand end to end, with `auto` turned off, because I wanted every sentence in them to be one a person wrote. A real site would start with the one tag and add sentences where the tickets are.
 
-What those two lines save you building: the map, with the sentence for why something isn't visible and what to open first; five WebMCP tools with annotations, retries when a browser rejects one, a tool that comes and goes with page state, abort handling; waiting for a real human click, tick or keystroke on one element and knowing it happened; catching the wrong click, nudging, and rewinding when the person leaves the screen; the spotlight, caption and cursor following the element through scroll and resize; the policy check; and a transcript of every call and every click. About 900 lines that every "show me how" feature needs and none of them wants to write.
+What that one tag saves you building: the map, with the sentence for why something isn't visible and what to open first; five WebMCP tools with annotations, retries when a browser rejects one, a tool that comes and goes with page state, abort handling; waiting for a real human click, tick or keystroke on one element and knowing it happened; catching the wrong click, nudging, and rewinding when the person leaves the screen; the spotlight, caption and cursor following the element through scroll and resize; the policy check; and a transcript of every call and every click. About 900 lines that every "show me how" feature needs and none of them wants to write.
 
-The map is rebuilt from the live DOM on every call, so anything rendered dynamically (transaction rows, the WIP limit fields for each column) is in it without doing anything. Colours come from `--showme-*` variables, which is why the spotlight is teal on PeruBank and blue on Meridian with the same two files.
+The map is rebuilt from the live DOM on every call, so anything rendered dynamically (transaction rows, the WIP limit fields for each column) is in it without doing anything. The overlay and the panel live in a shadow root, so your CSS can't restyle them and theirs can't touch your page. Colours still come from `--showme-*` variables set on your page's `:root`, which is why the spotlight is teal on PeruBank and blue on Meridian with the same two files.
 
 <details>
 <summary>Everything the library reads</summary>
@@ -182,7 +181,7 @@ It's all in [`showme.js`](showme.js), about 900 lines of vanilla JavaScript, no 
 - `requestUserInteraction` once browsers ship it, so the browser does the waiting instead of the page.
 - Declarative tools for the two read-only tools, once ChatGPT's browser supports them.
 - A screen list in `startGuide` for routers that unmount inactive screens, so the agent can plan to a screen that isn't rendered yet.
-- Publish to npm, so the two lines are a CDN URL.
+- Publish to npm, so the one tag is a CDN URL.
 - Run it on a site I didn't build.
 
 ## Notes
