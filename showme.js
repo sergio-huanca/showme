@@ -192,7 +192,7 @@ function view() {
 }
 
 function whyHidden(el) {
-  const id = el.dataset.guide
+  const id = idOf(el)
   if (el.dataset.guideMenu) {
     const opener = q(el.dataset.guideMenu)
     return `"${id}" is inside a closed menu. Guide the person to open "${el.dataset.guideMenu}" first (${opener ? desc(opener) : 'menu'}).`
@@ -425,7 +425,8 @@ async function doStep({ element_id, value }) {
   if (!visible(el)) return { ok: false, error: whyHidden(el) }
   el.scrollIntoView({ block: 'center', behavior: 'smooth' })
   await moveCursor(el)
-  if (el.matches('input, textarea')) {
+  const typed = el.matches('input:not([type=checkbox]):not([type=radio]), textarea')
+  if (typed) {
     el.focus()
     el.value = ''
     for (const ch of String(value ?? '')) {
@@ -434,12 +435,15 @@ async function doStep({ element_id, value }) {
       await sleep(45)
     }
     el.dispatchEvent(new Event('change', { bubbles: true }))
+  } else if (el.matches('select') && value != null) {
+    el.value = value
+    el.dispatchEvent(new Event('change', { bubbles: true }))
   } else {
     el.click()
   }
   await sleep(300)
   if (!walk) cursor.classList.remove('on')
-  return { ok: true, did: value != null && el.matches('input, textarea') ? `typed "${value}" into ${element_id}` : `clicked ${element_id}`, now: view() }
+  return { ok: true, did: typed ? `typed "${value ?? ''}" into ${element_id}` : el.matches('select') && value != null ? `chose "${value}" in ${element_id}` : `clicked ${element_id}`, now: view() }
 }
 
 const untilVisible = async (el, ms) => {
@@ -511,9 +515,10 @@ async function drive(run) {
       run.detours.push({ step: run.index + 1, clicked: run.lastClicked || null, rewound_to: i + 1 })
       logEvent(`You left the path at step ${run.index + 1}. The guide went back to step ${i + 1}.`)
       run.index = i
+      run.results.length = i
       continue
     }
-    await highlight({ element_id: step.element_id, message: (back ? 'Back on track. ' : '') + step.message })
+    await highlight({ element_id: step.element_id, message: (back ? 'Back on track. ' : '') + step.message, step: run.index + 1 })
     back = false
     let r
     do { r = await waitFor({ element_id: step.element_id, timeout_seconds: 600 }, {}) }
