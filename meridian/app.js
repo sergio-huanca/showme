@@ -457,7 +457,7 @@ go(location.hash)
 startGuide({
   app: 'Meridian',
   hint: 'How do I add the label "needs-design" to ATL-136?',
-  also: { name: 'PeruBank, an online bank', url: '../' },
+  also: { name: 'PeruBank, an online bank', url: '../bank/' },
   neutral: '#agent-activity-btn',
   auto: false,
   state: () => ({

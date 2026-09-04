@@ -35,5 +35,5 @@ export function serve(root, port = 0) {
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const { port } = await serve(process.cwd(), Number(process.env.PORT) || 8080)
-  console.log(`Meridian is running on http://localhost:${port}`)
+  console.log(`PeruBank at http://localhost:${port}/bank/, Meridian at http://localhost:${port}/meridian/, the page with no attributes at http://localhost:${port}/test/plain.html`)
 }

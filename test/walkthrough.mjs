@@ -245,7 +245,7 @@ try {
   await shot('narrow-issue-drawer')
 
   await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto(`http://localhost:${port}/`)
+  await page.goto(`http://localhost:${port}/bank/`)
   await page.waitForFunction(() => window.showme)
   assert.deepEqual(await toolNames(), ['get_ui_map', 'get_current_view', 'run_walkthrough', 'do_step_for_person'])
   assert.match(await page.textContent('.showme-ribbon'), /international transfers/)

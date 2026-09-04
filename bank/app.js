@@ -1,4 +1,4 @@
-import { startGuide, toggleDrawer } from './showme.js'
+import { startGuide, toggleDrawer } from '../showme.js'
 
 const $ = s => document.querySelector(s)
 const $$ = s => [...document.querySelectorAll(s)]
@@ -279,7 +279,7 @@ go(location.hash)
 startGuide({
   app: 'PeruBank',
   hint: 'How do I turn on international transfers?',
-  also: { name: 'Meridian, a team tracker', url: 'meridian/' },
+  also: { name: 'Meridian, a team tracker', url: '../meridian/' },
   neutral: '#agent-activity-btn',
   auto: false,
   state: () => ({

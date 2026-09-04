@@ -1,6 +1,6 @@
 # ShowMe · your agent points, you click
 
-**Live demo:** https://sergio-huanca.github.io/showme/ is PeruBank, https://sergio-huanca.github.io/showme/meridian/ is Meridian.
+**Live demo:** https://sergio-huanca.github.io/showme/bank/ is PeruBank, https://sergio-huanca.github.io/showme/meridian/ is Meridian. https://sergio-huanca.github.io/showme/ links to both.
 **Video:** YouTube link goes here.
 
 Where did they hide that setting? ShowMe is my entry for OpenAI's WebMCP Challenge. It's a small thing you add to a web app so people can ask their own AI agent that question and get walked through the answer on their own screen. The site hands the agent a map of its interface through WebMCP, the agent plans the path once, and the page lights up one element at a time. You do every click yourself. Click the wrong thing and the page nudges you back. Leave the screen and it rewinds to the last step you can still see. And the site's own markup says which steps an agent may ever do for you, so a bank can let an agent teach you how to move your money without being able to move it.
@@ -9,7 +9,7 @@ Where did they hide that setting? ShowMe is my entry for OpenAI's WebMCP Challen
 
 I built two fake sites to show it, and neither of them has any guide code in it:
 
-- **PeruBank** is a made-up online bank. The switch for international transfers is four levels deep (profile menu, a settings tab, a collapsed "Advanced" section), and the final Confirm is a button I never want an agent pressing. Disputing a charge is behind three dots inside a dialog. Freezing a card is behind three dots on the card.
+- **PeruBank** at `/bank/` is a made-up online bank. The switch for international transfers is four levels deep (profile menu, a settings tab, a collapsed "Advanced" section), and the final Confirm is a button I never want an agent pressing. Disputing a charge is behind three dots inside a dialog. Freezing a card is behind three dots on the card.
 - **Meridian** at `/meridian/` is a team issue tracker: board settings behind one three-dots menu, project settings behind another, a Labels field inside a collapsed section, and a type icon that nobody realises is a button.
 
 ## Why I built it
@@ -51,7 +51,7 @@ Both sites are fakes, so not every button does something, but every button tells
 
 ```
 npm install
-npm start          # http://localhost:8080 is PeruBank, http://localhost:8080/meridian/ is Meridian
+npm start          # http://localhost:8080/bank/ is PeruBank, http://localhost:8080/meridian/ is Meridian
 npm test           # Playwright drives both sites through document.modelContext in your installed Chrome
 ```
 

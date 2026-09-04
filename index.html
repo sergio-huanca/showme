@@ -1,274 +1,46 @@
 <!doctype html>
 <html lang="en">
-<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PeruBank · Accounts</title>
-<link rel="stylesheet" href="styles.css">
+<title>ShowMe · your agent points, you click</title>
 <link rel="icon" href="data:,">
-</head>
-<body>
-<svg hidden><defs>
-<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-dots" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="18" cy="12" r="1.8"/></symbol>
-<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 17v-6a6 6 0 0 1 12 0v6l1.5 2h-15zM10 21h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
-<symbol id="i-chev" viewBox="0 0 24 24"><path d="M8 10l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-right" viewBox="0 0 24 24"><path d="M10 8l4 4-4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-arrows" viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-<symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h8l5 5v13H6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 3v5h5M9 13h6M9 17h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
-<symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v12m0 0-4-4m4 4 4-4M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-</defs></svg>
-
-<header class="topbar">
-  <a class="brand" href="#accounts" data-guide="nav.home" data-guide-delegable data-guide-goto="accounts" data-guide-desc="PeruBank logo at the top left. Goes back to the Accounts overview"><span class="brand-mark"></span>PeruBank</a>
-  <span class="spacer"></span>
-  <button class="btn ghost" id="agent-activity-btn" data-guide="nav.agent" data-guide-desc="Agent activity button. Opens a panel that shows which tools the AI agent can see right now and every call it made"><span class="dot"></span>Agent activity</button>
-  <button class="icon-btn" aria-label="Notifications" data-guide="nav.notifications" data-guide-desc="Notifications bell at the top right"><svg><use href="#i-bell"/></svg><span class="badge">2</span></button>
-  <div class="menu-anchor">
-    <button class="avatar-btn" data-guide="nav.profile" data-guide-label="Profile menu" data-guide-delegable data-opens="nav.profile" data-guide-desc="Profile menu (your initials at the top right). Contains Settings, Security and Sign out. Settings is where transfer limits, notifications and security live; there is no Settings tab in the main navigation"><span class="avatar">SH</span><svg><use href="#i-chev"/></svg></button>
-    <div class="menu right" data-menu="nav.profile" hidden>
-      <div class="menu-head">Sergio Huanca · Personal</div>
-      <button data-guide="nav.profile.settings" data-guide-delegable data-guide-menu="nav.profile" data-guide-goto="settings" data-guide-desc="Settings, in the profile menu. Opens Profile, Security, Transfer limits, Notifications and Documents">Settings</button>
-      <button data-guide="nav.profile.security" data-guide-delegable data-guide-menu="nav.profile" data-guide-goto="settings/security" data-guide-desc="Security, in the profile menu. Shortcut to the Security page of Settings">Security</button>
-      <button data-guide="nav.profile.signout" data-guide-menu="nav.profile" data-guide-desc="Sign out, in the profile menu">Sign out</button>
-    </div>
+<style>
+  :root { --text: #172b4d; --muted: #626f86; --line: #dcdfe4; --accent: #0c66e4; }
+  body { margin: 0; font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; color: var(--text); background: #fff; }
+  main { max-width: 720px; margin: 0 auto; padding: 56px 24px 80px; }
+  h1 { font-size: 34px; margin: 0 0 8px; letter-spacing: -.5px; }
+  h1 small { display: block; font-size: 18px; font-weight: 500; color: var(--muted); margin-top: 4px; }
+  p { margin: 14px 0; }
+  .demos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 28px 0; }
+  .demos a { display: block; padding: 18px 20px; border: 1px solid var(--line); border-radius: 12px; color: inherit; text-decoration: none; }
+  .demos a:hover { border-color: var(--accent); }
+  .demos b { display: block; font-size: 18px; margin-bottom: 4px; }
+  .demos span { color: var(--muted); font-size: 14px; }
+  .demos .bank b { color: #0f766e; }
+  .demos .tracker b { color: var(--accent); }
+  pre { background: #f7f8f9; border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13px; line-height: 1.5; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .foot { margin-top: 36px; font-size: 14px; color: var(--muted); }
+  .foot a { color: inherit; }
+  @media (max-width: 560px) { .demos { grid-template-columns: 1fr; } h1 { font-size: 28px; } }
+</style>
+<main>
+  <h1>ShowMe <small>your agent points, you click</small></h1>
+  <p>Where did they hide that setting? Ask your agent, and the site lights up where to click next, on your own screen, one step at a time. You do every click. The site decides which steps an agent may never do for you.</p>
+  <p>Two fake apps to try it on. Open one in ChatGPT's browser, or in Chrome 149 with WebMCP turned on, and ask.</p>
+  <div class="demos">
+    <a class="bank" href="bank/"><b>PeruBank</b><span>An online bank. Ask how to turn on international transfers. The agent can show you, and can never press Confirm.</span></a>
+    <a class="tracker" href="meridian/"><b>Meridian</b><span>A team issue tracker. Ask how to add a label, a column, or change an issue's type. Click the wrong thing and watch it recover.</span></a>
   </div>
-</header>
-<nav class="tabs">
-  <a class="tab active" href="#accounts" data-guide="nav.tab.accounts" data-guide-delegable data-guide-goto="accounts" data-guide-desc="Accounts tab: balances, quick actions and recent transactions">Accounts</a>
-  <a class="tab" href="#transfers" data-guide="nav.tab.transfers" data-guide-delegable data-guide-goto="transfers" data-guide-desc="Transfers tab: between your accounts, to someone else, or international">Transfers</a>
-  <a class="tab" href="#cards" data-guide="nav.tab.cards" data-guide-delegable data-guide-goto="cards" data-guide-desc="Cards tab: your debit and credit cards, each with a menu to freeze, replace or change the PIN">Cards</a>
-  <a class="tab" href="#statements" data-guide="nav.tab.statements" data-guide-delegable data-guide-goto="statements" data-guide-desc="Statements tab: monthly statements to download">Statements</a>
-  <a class="tab" href="#help" data-guide="nav.tab.help" data-guide-delegable data-guide-goto="help" data-guide-desc="Help tab: frequently asked questions">Help</a>
-</nav>
-
-<main class="content">
-
-<section data-screen="accounts" data-screen-desc="Accounts overview: balances of the checking, savings and credit card accounts, quick actions and the latest transactions. Clicking a transaction opens its detail dialog">
-  <div class="page-head"><h1>Good evening, Sergio</h1><span class="muted">Tuesday 2 September</span></div>
-  <div class="accounts">
-    <div class="acct" data-guide="accounts.checking" data-guide-desc="Everyday Checking account tile (•••• 4821). Shows the available balance"><span class="acct-name">Everyday Checking</span><span class="acct-num">•••• 4821</span><b id="bal-checking"></b><span class="muted">Available</span></div>
-    <div class="acct" data-guide="accounts.savings" data-guide-desc="Savings account tile (•••• 7730)"><span class="acct-name">Savings</span><span class="acct-num">•••• 7730</span><b id="bal-savings"></b><span class="muted">2.1% APY</span></div>
-    <div class="acct credit" data-guide="accounts.credit" data-guide-desc="Credit card tile (•••• 1177). Shows the current balance and the available credit"><span class="acct-name">Credit card</span><span class="acct-num">•••• 1177</span><b id="bal-credit"></b><span class="muted" id="bal-credit-available"></span></div>
-  </div>
-  <div class="quick">
-    <a class="btn primary" href="#transfers" data-guide="accounts.transfer" data-guide-delegable data-guide-goto="transfers" data-guide-desc="Transfer quick action on the Accounts overview. Opens the Transfers page"><svg><use href="#i-arrows"/></svg>Transfer</a>
-    <button class="btn" data-guide="accounts.pay" data-guide-desc="Pay a bill quick action">Pay a bill</button>
-    <button class="btn" data-guide="accounts.deposit" data-guide-desc="Deposit a check quick action">Deposit a check</button>
-  </div>
-  <div class="tx-head">
-    <h2>Recent transactions</h2>
-    <div class="search"><svg><use href="#i-search"/></svg><input id="tx-search" type="search" placeholder="Search transactions" autocomplete="off" data-guide="accounts.search" data-guide-delegable data-guide-desc="Search box that filters the recent transactions by merchant"></div>
-  </div>
-  <div class="tx-list" id="tx-list"></div>
-</section>
-
-<section data-screen="transfers" data-screen-desc="Transfers. Left navigation: Between my accounts, To someone, International. International transfers are turned off until the person turns them on in Settings › Transfer limits › Advanced" hidden>
-  <h1>Transfers</h1>
-  <div class="settings-layout">
-    <nav class="settings-nav">
-      <button class="snav" data-panel-target="between" data-guide="transfers.tab.between" data-guide-delegable data-guide-desc="Between my accounts panel of Transfers">Between my accounts</button>
-      <button class="snav" data-panel-target="someone" data-guide="transfers.tab.someone" data-guide-delegable data-guide-desc="To someone panel of Transfers: send money to a saved payee">To someone</button>
-      <button class="snav" data-panel-target="international" data-guide="transfers.tab.international" data-guide-delegable data-guide-desc="International panel of Transfers. Shows a notice while international transfers are turned off">International</button>
-    </nav>
-    <div class="settings-body">
-      <form data-panel="between" data-panel-desc="Move money between your own PeruBank accounts. Transfers are immediate" id="between-form">
-        <h2>Between my accounts</h2>
-        <label class="field">From<select data-guide="transfers.from" data-guide-desc="From account dropdown of the transfer form"><option value="checking">Everyday Checking •••• 4821</option><option value="savings">Savings •••• 7730</option></select></label>
-        <label class="field">To<select data-guide="transfers.to" data-guide-desc="To account dropdown of the transfer form"><option value="savings">Savings •••• 7730</option><option value="checking">Everyday Checking •••• 4821</option></select></label>
-        <label class="field">Amount<input inputmode="decimal" placeholder="0.00" autocomplete="off" data-guide="transfers.amount" data-guide-desc="Amount field of the transfer form, in dollars"></label>
-        <button type="submit" class="btn primary" data-guide="transfers.send" data-guide-danger data-guide-desc="Transfer button. Moves the money immediately and cannot be undone">Transfer</button>
-      </form>
-      <form data-panel="someone" data-panel-desc="Send money to a saved payee" id="someone-form" hidden>
-        <h2>To someone</h2>
-        <label class="field">Payee<select data-guide="transfers.payee" data-guide-desc="Payee dropdown: saved people and businesses"><option>Ana Kowalski</option><option>Ferro Properties (rent)</option><option>Diego García</option></select></label>
-        <label class="field">Amount<input inputmode="decimal" placeholder="0.00" autocomplete="off" data-guide="transfers.someone.amount" data-guide-desc="Amount field for the payment to a payee"></label>
-        <button type="submit" class="btn primary" data-guide="transfers.someone.send" data-guide-danger data-guide-desc="Send button. Sends the money to the payee immediately and cannot be undone">Send</button>
-      </form>
-      <div data-panel="international" data-panel-desc="International transfers. Off by default; the notice links to the setting that turns them on" hidden>
-        <h2>International</h2>
-        <div class="notice" id="intl-off">
-          <b>International transfers are turned off for this profile.</b>
-          <span>Turn them on under Settings › Transfer limits › Advanced. You confirm with a code sent to your phone.</span>
-          <a class="btn" href="#settings/limits" data-guide="transfers.international.enable" data-guide-delegable data-guide-goto="settings/limits" data-guide-desc="Go to Transfer limits link inside the International notice. Shortcut to Settings › Transfer limits, where the International transfers toggle lives inside the collapsed Advanced section">Go to Transfer limits</a>
-        </div>
-        <form id="intl-form" hidden>
-          <label class="field">Recipient country<select data-guide="transfers.international.country" data-guide-desc="Recipient country dropdown of the international transfer form"><option>Peru</option><option>Spain</option><option>Germany</option><option>Mexico</option><option>Japan</option></select></label>
-          <label class="field">IBAN or account number<input autocomplete="off" placeholder="ES91 2100 0418 4502 0005 1332" data-guide="transfers.international.iban" data-guide-desc="Recipient IBAN or account number field"></label>
-          <label class="field">Amount<input inputmode="decimal" placeholder="0.00" autocomplete="off" data-guide="transfers.international.amount" data-guide-desc="Amount field of the international transfer form, in dollars"></label>
-          <button type="submit" class="btn primary" data-guide="transfers.international.send" data-guide-danger data-guide-desc="Send button of the international transfer form. Sends the money abroad and cannot be undone">Send</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section data-screen="cards" data-screen-desc="Cards: the debit and credit cards. Each card has a three-dots menu with Freeze card, Change PIN, Replace card and Travel notice. Card controls for the debit card are below" hidden>
-  <h1>Cards</h1>
-  <div class="cards">
-    <div class="bankcard debit" id="card-debit">
-      <div class="bankcard-top"><span>Debit card</span><span class="chip frozen" id="frozen-debit" hidden>Frozen</span>
-        <div class="menu-anchor">
-          <button class="icon-btn light" data-guide="cards.debit.more" data-guide-label="Debit card menu" data-guide-delegable data-opens="cards.debit.more" data-guide-desc="More actions (three dots) on the debit card. Contains Freeze card, Change PIN, Replace card and Travel notice"><svg><use href="#i-dots"/></svg></button>
-          <div class="menu right" data-menu="cards.debit.more" hidden>
-            <button data-guide="cards.debit.freeze" data-guide-menu="cards.debit.more" id="freeze-debit" data-guide-desc="Freeze or unfreeze the debit card, in the card menu. A frozen card declines every purchase until it is unfrozen. The person decides this">Freeze card</button>
-            <button data-guide="cards.debit.pin" data-guide-menu="cards.debit.more" data-guide-desc="Change the PIN of the debit card, in the card menu">Change PIN</button>
-            <button data-guide="cards.debit.replace" data-guide-menu="cards.debit.more" data-guide-desc="Order a replacement debit card, in the card menu">Replace card</button>
-            <button data-guide="cards.debit.travel" data-guide-menu="cards.debit.more" data-guide-desc="Add a travel notice for the debit card, in the card menu">Travel notice</button>
-          </div>
-        </div>
-      </div>
-      <div class="bankcard-num">•••• •••• •••• 4821</div>
-      <div class="bankcard-foot"><span>SERGIO HUANCA</span><span>09/29</span></div>
-    </div>
-    <div class="bankcard credit" id="card-credit">
-      <div class="bankcard-top"><span>Credit card</span><span class="chip frozen" id="frozen-credit" hidden>Frozen</span>
-        <div class="menu-anchor">
-          <button class="icon-btn light" data-guide="cards.credit.more" data-guide-label="Credit card menu" data-guide-delegable data-opens="cards.credit.more" data-guide-desc="More actions (three dots) on the credit card. Contains Freeze card, Change PIN, Replace card and Travel notice"><svg><use href="#i-dots"/></svg></button>
-          <div class="menu right" data-menu="cards.credit.more" hidden>
-            <button data-guide="cards.credit.freeze" data-guide-menu="cards.credit.more" id="freeze-credit" data-guide-desc="Freeze or unfreeze the credit card, in the card menu. The person decides this">Freeze card</button>
-            <button data-guide="cards.credit.pin" data-guide-menu="cards.credit.more" data-guide-desc="Change the PIN of the credit card, in the card menu">Change PIN</button>
-            <button data-guide="cards.credit.replace" data-guide-menu="cards.credit.more" data-guide-desc="Order a replacement credit card, in the card menu">Replace card</button>
-            <button data-guide="cards.credit.travel" data-guide-menu="cards.credit.more" data-guide-desc="Add a travel notice for the credit card, in the card menu">Travel notice</button>
-          </div>
-        </div>
-      </div>
-      <div class="bankcard-num">•••• •••• •••• 1177</div>
-      <div class="bankcard-foot"><span>SERGIO HUANCA</span><span>03/28</span></div>
-    </div>
-  </div>
-  <h2>Card controls · Debit card</h2>
-  <div class="panel">
-    <label class="toggle"><input type="checkbox" checked data-guide="cards.controls.online" data-guide-desc="Online purchases toggle for the debit card">Online purchases</label>
-    <label class="toggle"><input type="checkbox" checked data-guide="cards.controls.contactless" data-guide-desc="Contactless payments toggle for the debit card">Contactless payments</label>
-    <label class="toggle"><input type="checkbox" data-guide="cards.controls.abroad" data-guide-desc="Purchases abroad toggle for the debit card. Off by default">Purchases abroad</label>
-  </div>
-</section>
-
-<section data-screen="statements" data-screen-desc="Monthly statements to download" hidden>
-  <h1>Statements</h1>
-  <div class="panel">
-    <table class="tbl"><tr><th>Month</th><th>Account</th><th></th></tr>
-      <tr><td>August 2026</td><td>Everyday Checking</td><td><button class="btn subtle" data-guide="statements.download.aug" data-guide-delegable data-guide-desc="Download the August 2026 statement (PDF)"><svg><use href="#i-down"/></svg>PDF</button></td></tr>
-      <tr><td>July 2026</td><td>Everyday Checking</td><td><button class="btn subtle" data-guide="statements.download.jul" data-guide-delegable data-guide-desc="Download the July 2026 statement (PDF)"><svg><use href="#i-down"/></svg>PDF</button></td></tr>
-      <tr><td>June 2026</td><td>Everyday Checking</td><td><button class="btn subtle" data-guide="statements.download.jun" data-guide-delegable data-guide-desc="Download the June 2026 statement (PDF)"><svg><use href="#i-down"/></svg>PDF</button></td></tr>
-    </table>
-  </div>
-</section>
-
-<section data-screen="help" data-screen-desc="Help: frequently asked questions" hidden>
-  <h1>Help</h1>
-  <ul class="plain">
-    <li><b>How do I freeze my card?</b><span class="muted">Cards › the three dots on the card › Freeze card.</span></li>
-    <li><b>How do I dispute a charge?</b><span class="muted">Accounts › open the transaction › the three dots › Dispute this charge.</span></li>
-    <li><b>How do I send money abroad?</b><span class="muted">Turn on international transfers first: profile menu › Settings › Transfer limits › Advanced.</span></li>
-  </ul>
-</section>
-
-<section data-screen="settings" data-screen-desc="Settings, reached from the profile menu at the top right. Left navigation: Profile, Security, Transfer limits, Notifications, Documents" hidden>
-  <h1>Settings</h1>
-  <div class="settings-layout">
-    <nav class="settings-nav">
-      <button class="snav" data-panel-target="profile" data-guide="settings.tab.profile" data-guide-delegable data-guide-desc="Profile page of Settings: name, email, phone">Profile</button>
-      <button class="snav" data-panel-target="security" data-guide="settings.tab.security" data-guide-delegable data-guide-desc="Security page of Settings: two-step verification, sign-in alerts, password, trusted devices">Security</button>
-      <button class="snav" data-panel-target="limits" data-guide="settings.tab.limits" data-guide-delegable data-guide-desc="Transfer limits page of Settings: daily and per-transaction limits, and an Advanced section with International transfers and same-day transfers to new payees">Transfer limits</button>
-      <button class="snav" data-panel-target="notifications" data-guide="settings.tab.notifications" data-guide-delegable data-guide-desc="Notifications page of Settings: which alerts you get">Notifications</button>
-      <button class="snav" data-panel-target="documents" data-guide="settings.tab.documents" data-guide-delegable data-guide-desc="Documents page of Settings: tax forms and agreements">Documents</button>
-    </nav>
-    <div class="settings-body">
-      <div data-panel="profile" data-panel-desc="Name, email and phone on file">
-        <h2>Profile</h2>
-        <label class="field">Full name<input value="Sergio Huanca" data-guide="settings.profile.name" data-guide-desc="Full name field"></label>
-        <label class="field">Email<input value="sergio@example.com" data-guide="settings.profile.email" data-guide-desc="Email field"></label>
-        <label class="field">Phone<input value="+1 (415) 555-8821" data-guide="settings.profile.phone" data-guide-desc="Phone number field. Confirmation codes are sent here"></label>
-      </div>
-      <div data-panel="security" data-panel-desc="Two-step verification, sign-in alerts, password and trusted devices" hidden>
-        <h2>Security</h2>
-        <label class="toggle"><input type="checkbox" checked data-guide="settings.security.2fa" data-guide-desc="Two-step verification toggle">Two-step verification</label>
-        <label class="toggle"><input type="checkbox" checked data-guide="settings.security.alerts" data-guide-desc="Alert me about new sign-ins toggle">Alert me about new sign-ins</label>
-        <p><button class="btn" data-guide="settings.security.password" data-guide-desc="Change password button">Change password</button></p>
-        <h3>Trusted devices</h3>
-        <table class="tbl"><tr><th>Device</th><th>Last used</th><th></th></tr>
-          <tr><td>MacBook Pro · Safari</td><td>Today</td><td><button class="btn subtle" data-guide="settings.security.devices.remove.macbook" data-guide-danger data-guide-desc="Remove the MacBook Pro from trusted devices. It will need a code next time">Remove</button></td></tr>
-          <tr><td>iPhone · PeruBank app</td><td>Yesterday</td><td><button class="btn subtle" data-guide="settings.security.devices.remove.iphone" data-guide-danger data-guide-desc="Remove the iPhone from trusted devices">Remove</button></td></tr>
-        </table>
-      </div>
-      <div data-panel="limits" data-panel-desc="Transfer limits. The Advanced section is collapsed and holds International transfers and same-day transfers to new payees" hidden>
-        <h2>Transfer limits</h2>
-        <label class="field">Daily limit<input value="2,500.00" data-guide="settings.limits.daily" data-guide-desc="Daily transfer limit field, in dollars. Saves when you leave the field"></label>
-        <label class="field">Per transaction<input value="1,000.00" data-guide="settings.limits.single" data-guide-desc="Per-transaction limit field, in dollars"></label>
-        <button class="section-toggle" data-guide="settings.limits.advanced" data-guide-delegable data-guide-desc="Advanced section header on the Transfer limits page. Collapsed by default; expand it to reach International transfers and Same-day transfers to new payees"><svg><use href="#i-right"/></svg>Advanced</button>
-        <div id="limits-advanced" hidden>
-          <label class="toggle"><input type="checkbox" id="intl-toggle" data-guide="settings.limits.international" data-guide-desc="International transfers toggle inside the Advanced section of Transfer limits. Turning it on asks for a code sent to your phone. The account holder decides this">International transfers</label>
-          <label class="toggle"><input type="checkbox" checked data-guide="settings.limits.newpayee" data-guide-desc="Same-day transfers to new payees toggle inside the Advanced section">Same-day transfers to new payees</label>
-        </div>
-      </div>
-      <div data-panel="notifications" data-panel-desc="Which alerts you receive" hidden>
-        <h2>Notifications</h2>
-        <label class="toggle"><input type="checkbox" checked data-guide="settings.notifications.purchases" data-guide-desc="Alert for every card purchase toggle">Every card purchase</label>
-        <label class="toggle"><input type="checkbox" checked data-guide="settings.notifications.lowbalance" data-guide-desc="Low balance alert toggle">Low balance</label>
-        <label class="toggle"><input type="checkbox" data-guide="settings.notifications.statements" data-guide-desc="New statement alert toggle">New statement ready</label>
-        <label class="toggle"><input type="checkbox" data-guide="settings.notifications.offers" data-guide-desc="Offers and news toggle">Offers and news</label>
-      </div>
-      <div data-panel="documents" data-panel-desc="Tax forms and agreements" hidden>
-        <h2>Documents</h2>
-        <ul class="plain">
-          <li><b>1099-INT 2025</b><button class="btn subtle" data-guide="settings.documents.tax" data-guide-delegable data-guide-desc="Download the 1099-INT tax form"><svg><use href="#i-down"/></svg>PDF</button></li>
-          <li><b>Account agreement</b><button class="btn subtle" data-guide="settings.documents.agreement" data-guide-delegable data-guide-desc="Download the account agreement"><svg><use href="#i-down"/></svg>PDF</button></li>
-          <li><b>Fee schedule</b><button class="btn subtle" data-guide="settings.documents.fees" data-guide-delegable data-guide-desc="Download the fee schedule"><svg><use href="#i-down"/></svg>PDF</button></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
+  <p>Adding it to a site is one tag. The page is mapped from the markup it already has.</p>
+<pre><code>&lt;script type="module"&gt;
+  import { startGuide } from './showme.js'
+  startGuide({ app: 'Your app' })
+&lt;/script&gt;</code></pre>
+  <p class="foot">Built for OpenAI's WebMCP Challenge. <a href="https://github.com/sergio-huanca/showme">Source and README on GitHub</a> · <a href="check.html">Does this browser have WebMCP?</a></p>
 </main>
-
-<div class="modal-backdrop" id="tx-modal" data-dialog="transaction" data-dialog-desc="Transaction detail. Opens by clicking a transaction row on the Accounts overview" hidden>
-  <div class="modal">
-    <div class="modal-head">
-      <div><div class="muted" id="tx-date"></div><h2 id="tx-merchant"></h2></div>
-      <span class="spacer"></span>
-      <div class="menu-anchor">
-        <button class="icon-btn" data-guide="tx.more" data-guide-label="Transaction menu" data-guide-delegable data-opens="tx.more" data-guide-desc="More actions (three dots) at the top right of the transaction dialog. Contains Dispute this charge, Download receipt and Report card lost or stolen"><svg><use href="#i-dots"/></svg></button>
-        <div class="menu right" data-menu="tx.more" hidden>
-          <button data-guide="tx.more.dispute" data-guide-delegable data-guide-menu="tx.more" data-guide-desc="Dispute this charge, in the transaction menu. Reveals the dispute form inside the dialog">Dispute this charge</button>
-          <button data-guide="tx.more.receipt" data-guide-menu="tx.more" data-guide-desc="Download the receipt, in the transaction menu">Download receipt</button>
-          <button class="danger" data-guide="tx.more.lost" data-guide-menu="tx.more" data-guide-danger data-guide-desc="Report the card lost or stolen, in the transaction menu. Blocks the card immediately and orders a replacement">Report card lost or stolen</button>
-        </div>
-      </div>
-      <button class="icon-btn" data-guide="tx.close" data-guide-delegable data-guide-desc="Close the transaction dialog (X at the top right)"><svg><use href="#i-x"/></svg></button>
-    </div>
-    <div class="tx-amount" id="tx-amount"></div>
-    <dl class="meta"><dt>Account</dt><dd id="tx-account"></dd><dt>Category</dt><dd id="tx-category"></dd><dt>Status</dt><dd id="tx-status"></dd><dt>Reference</dt><dd id="tx-ref"></dd></dl>
-    <form id="dispute-form" class="dispute" hidden>
-      <h3>Dispute this charge</h3>
-      <label class="field">Reason<select data-guide="tx.dispute.reason" data-guide-desc="Reason dropdown of the dispute form"><option value="">Choose a reason</option><option>I was charged twice</option><option>I did not receive what I paid for</option><option>The amount is wrong</option><option>I do not recognize this charge</option></select></label>
-      <label class="field">Details<textarea placeholder="Anything that helps us look into it (optional)" data-guide="tx.dispute.details" data-guide-desc="Optional details text box of the dispute form"></textarea></label>
-      <div class="row end">
-        <button type="button" class="btn subtle" data-guide="tx.dispute.cancel" data-guide-desc="Cancel the dispute form">Cancel</button>
-        <button type="submit" class="btn primary" data-guide="tx.dispute.submit" data-guide-desc="Submit dispute button. Files a formal claim with the card network in the person's name, so the person submits it themselves">Submit dispute</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<div class="modal-backdrop" id="confirm-modal" data-dialog="confirm-international" data-dialog-desc="Confirmation with a code. Opens when the International transfers toggle in Settings › Transfer limits › Advanced is switched on" hidden>
-  <form class="modal small" id="confirm-form">
-    <h2>Confirm it is you</h2>
-    <p class="muted">We sent a 6-digit code to •••• 8821. In this demo any six digits work.</p>
-    <label class="field">Code<input id="confirm-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" data-guide="confirm.code" data-guide-desc="6-digit code field of the confirmation dialog"></label>
-    <div class="row end">
-      <button type="button" class="btn subtle" data-guide="confirm.cancel" data-guide-desc="Cancel. Leaves international transfers off">Cancel</button>
-      <button type="submit" class="btn primary" data-guide="confirm.confirm" data-guide-danger data-guide-desc="Confirm button of the confirmation dialog. Turns on international transfers for this profile. Only the account holder does this, never an agent">Confirm</button>
-    </div>
-  </form>
-</div>
-
-<div class="toast" id="toast" hidden></div>
-
-<script>if (location.protocol === 'file:') document.body.insertAdjacentHTML('afterbegin', '<div class="file-banner">This page was opened from disk, so the browser blocks its scripts. Run <code>npm start</code> and open <code>http://localhost:8080</code>.</div>')</script>
-<script type="module" src="app.js"></script>
-</body>
+<script type="module">
+  import { startGuide } from './showme.js'
+  startGuide({ app: 'ShowMe', delegable: 'a[href]' })
+</script>
 </html>
