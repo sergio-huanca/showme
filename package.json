@@ -1,8 +1,31 @@
 {
-  "name": "showme",
-  "private": true,
-  "type": "module",
+  "name": "showme-guide",
+  "version": "0.1.0",
   "description": "Agents that teach instead of doing: a WebMCP guide layer on an online bank and a Jira-style tracker",
+  "license": "MIT",
+  "type": "module",
+  "main": "./showme.js",
+  "exports": {
+    ".": "./showme.js",
+    "./showme.css": "./showme.css"
+  },
+  "files": [
+    "showme.js",
+    "showme.css"
+  ],
+  "keywords": [
+    "webmcp",
+    "agent",
+    "walkthrough",
+    "guide",
+    "onboarding",
+    "modelcontext"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sergio-huanca/showme"
+  },
+  "homepage": "https://sergio-huanca.github.io/showme/",
   "scripts": {
     "start": "node serve.mjs",
     "test": "node test/walkthrough.mjs"
