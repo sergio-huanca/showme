@@ -13,8 +13,8 @@
   [role=dialog] { position: fixed; inset: 30% 30%; background: #fff; border: 2px solid #333; padding: 20px; }
 </style>
 <header>
-  <a href="/">Home</a>
-  <a href="/meridian/">Tracker</a>
+  <a href="../">Home</a>
+  <a href="../meridian/">Tracker</a>
   <button id="profile" aria-haspopup="menu" aria-controls="profile-menu" aria-expanded="false">Profile</button>
   <div id="profile-menu" role="menu" hidden>
     <button role="menuitem" id="mi-settings">Settings</button>
@@ -45,7 +45,7 @@
   <button id="ok" class="danger">Confirm</button>
 </div>
 <script type="module">
-  import { startGuide } from '/showme.js'
+  import { startGuide } from '../showme.js'
   const $ = s => document.querySelector(s)
   window.state = { international: 'off' }
   $('#profile').onclick = () => { const m = $('#profile-menu'); m.hidden = !m.hidden; $('#profile').setAttribute('aria-expanded', String(!m.hidden)) }
@@ -57,5 +57,5 @@
   $('#intl').onchange = () => { if ($('#intl').checked) $('#confirm').hidden = false }
   $('#cancel').onclick = () => { $('#confirm').hidden = true; $('#intl').checked = false }
   $('#ok').onclick = () => { $('#confirm').hidden = true; window.state.international = 'on' }
-  startGuide({ app: 'Plain', state: () => window.state, delegable: 'a[href], [role=tab], [role=menuitem], [aria-haspopup]', danger: '.danger' })
+  startGuide({ app: 'Plain', hint: 'How do I turn on international transfers?', state: () => window.state, delegable: 'a[href], [role=tab], [role=menuitem], [aria-haspopup]', danger: '.danger' })
 </script>

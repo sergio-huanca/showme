@@ -55,7 +55,7 @@ npm start          # http://localhost:8080/bank/ is PeruBank, http://localhost:8
 npm test           # Playwright drives both sites through document.modelContext in your installed Chrome
 ```
 
-`http://localhost:8080/test/plain.html` is a third page with no ShowMe attributes at all. The test walks an agent through it too.
+`http://localhost:8080/test/plain.html` is a third page with no ShowMe attributes at all. The test walks an agent through it too. It's live as well, at https://sergio-huanca.github.io/showme/test/plain.html, if you want to see the automatic map on a page that has none of the attributes.
 
 ## Adding it to your site
 
