@@ -583,7 +583,7 @@ async function runWalkthrough({ steps, title, timeout_seconds }, ctx = {}) {
 }
 
 const objSchema = (props = {}, required = []) => ({ type: 'object', properties: props, ...(required.length ? { required } : {}) })
-const elementId = { type: 'string', description: 'Element id from get_ui_map, for example board.more' }
+const elementId = { type: 'string', description: 'Element id from get_ui_map, for example nav.profile or button:confirm' }
 
 const baseTools = () => [
   {
@@ -624,10 +624,10 @@ const baseTools = () => [
   },
   {
     name: 'do_step_for_person',
-    description: `Perform one step on behalf of the person, only when they explicitly ask you to. ${app.app} allows this for navigation and search boxes and refuses anything else, which the person does themselves. Returns refused:true with the policy when not allowed.`,
+    description: `Perform one step on behalf of the person, only when they explicitly ask you to. ${app.app} allows it only for steps it marks as delegable, typically navigation and search boxes, and refuses the rest, which the person does themselves. Returns refused:true with the policy when not allowed.`,
     inputSchema: objSchema({
       element_id: elementId,
-      value: { type: 'string', description: 'Text to type when the element is a text field' },
+      value: { type: 'string', description: 'Text to type into a text field, or the option to choose in a dropdown' },
     }, ['element_id']),
     annotations: { readOnlyHint: false, untrustedContentHint: true },
     execute: doStep,
@@ -871,8 +871,9 @@ ${you}
 
 function trackActions() {
   const mark = e => {
-    const g = e.target.closest && e.target.closest('[data-guide]')
-    if (g) lastAction.set(g.dataset.guide, performance.now())
+    const g = e.target.closest && (e.target.closest('[data-guide]') || e.target.closest(INTERACTIVE))
+    const id = idOf(g)
+    if (id) lastAction.set(id, performance.now())
   }
   document.addEventListener('click', mark, true)
   document.addEventListener('change', mark, true)
